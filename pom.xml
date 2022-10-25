@@ -38,4 +38,16 @@
 		</plugins>
 	</build>
 
+	<dependencyManagement>
+		<dependencies>
+
+			<dependency>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>1.32</version>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
 </project>
