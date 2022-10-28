@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping(value = "/users")
 public class UserController {
     private final HashMap<Long, User> userService = new HashMap<>();
-    private Long nextId = 1L;
+    private long nextId = 1L;
 
     @GetMapping
     public List<User> findAll() {

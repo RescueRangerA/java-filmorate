@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping(value = "/films")
 public class FilmController {
     private final HashMap<Long, Film> filmService = new HashMap<>();
-    private Long nextId = 1L;
+    private long nextId = 1L;
 
     @GetMapping
     public List<Film> findAll() {
