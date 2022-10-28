@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
@@ -26,21 +24,21 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> create(@Valid @RequestBody User user) {
+    public User create(@Valid @RequestBody User user) {
         user.setId(nextId++);
         userStorage.put(user.getId(), user);
 
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return user;
     }
 
     @PutMapping
-    public ResponseEntity<User> createOrUpdate(@Valid @RequestBody User user) {
+    public User createOrUpdate(@Valid @RequestBody User user) throws ValidationException {
         if (!userStorage.containsKey(user.getId())) {
-            return new ResponseEntity<>(user, HttpStatus.NOT_FOUND);
+            throw new ValidationException(String.format("User with id '%d' already exists", user.getId()));
         }
 
         userStorage.put(user.getId(), user);
 
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return user;
     }
 }

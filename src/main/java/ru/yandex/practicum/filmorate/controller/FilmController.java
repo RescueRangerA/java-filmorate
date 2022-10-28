@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -26,21 +24,21 @@ public class FilmController {
     }
 
     @PostMapping
-    public ResponseEntity<Film> create(@Valid @RequestBody Film film) {
+    public Film create(@Valid @RequestBody Film film) {
         film.setId(nextId++);
         filmStorage.put(film.getId(), film);
 
-        return new ResponseEntity<>(film, HttpStatus.CREATED);
+        return film;
     }
 
     @PutMapping
-    public ResponseEntity<Film> createOrUpdate(@Valid @RequestBody Film film) {
+    public Film createOrUpdate(@Valid @RequestBody Film film) throws ValidationException {
         if (!filmStorage.containsKey(film.getId())) {
-            return new ResponseEntity<>(film, HttpStatus.NOT_FOUND);
+            throw new ValidationException(String.format("Film with id '%d' already exists", film.getId()));
         }
 
         filmStorage.put(film.getId(), film);
 
-        return new ResponseEntity<>(film, HttpStatus.OK);
+        return film;
     }
 }
