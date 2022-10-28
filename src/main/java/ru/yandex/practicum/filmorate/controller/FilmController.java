@@ -10,35 +10,36 @@ import ru.yandex.practicum.filmorate.model.Film;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
 @Validated
 @RequestMapping(value = "/films")
 public class FilmController {
-    private final HashMap<Long, Film> filmService = new HashMap<>();
+    private final Map<Long, Film> filmStorage = new HashMap<>();
     private long nextId = 1L;
 
     @GetMapping
     public List<Film> findAll() {
-        return List.copyOf(filmService.values());
+        return List.copyOf(filmStorage.values());
     }
 
     @PostMapping
     public ResponseEntity<Film> create(@Valid @RequestBody Film film) {
         film.setId(nextId++);
-        filmService.put(film.getId(), film);
+        filmStorage.put(film.getId(), film);
 
         return new ResponseEntity<>(film, HttpStatus.CREATED);
     }
 
     @PutMapping
     public ResponseEntity<Film> createOrUpdate(@Valid @RequestBody Film film) {
-        if (!filmService.containsKey(film.getId())) {
+        if (!filmStorage.containsKey(film.getId())) {
             return new ResponseEntity<>(film, HttpStatus.NOT_FOUND);
         }
 
-        filmService.put(film.getId(), film);
+        filmStorage.put(film.getId(), film);
 
         return new ResponseEntity<>(film, HttpStatus.OK);
     }
