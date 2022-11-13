@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
-public class User {
+public class User implements Entity {
     @Positive
     @Nullable
     private Long id;

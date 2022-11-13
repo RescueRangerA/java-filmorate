@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UpdateNonExistingEntity;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -20,7 +22,7 @@ public class UserControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        controller = new UserController();
+        controller = new UserController(new InMemoryUserStorage());
     }
 
     @Test
@@ -86,7 +88,7 @@ public class UserControllerTest {
         User updateUser = new User(9999L, "mail@yandex.ru", "doloreUpdate", "est adipisicing", LocalDate.parse("1976-09-20", DateTimeFormatter.ISO_DATE));
         Assertions.assertEquals(Set.of(), validator.validate(user));
 
-        Assertions.assertThrows(ValidationException.class, () -> controller.createOrUpdate(updateUser));
+        Assertions.assertThrows(UpdateNonExistingEntity.class, () -> controller.createOrUpdate(updateUser));
     }
 
     @Test

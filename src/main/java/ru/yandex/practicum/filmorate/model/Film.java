@@ -11,7 +11,7 @@ import javax.validation.constraints.*;
 
 @Data
 @AllArgsConstructor
-public class Film {
+public class Film implements Entity {
     @Positive
     @Nullable
     private Long id;
