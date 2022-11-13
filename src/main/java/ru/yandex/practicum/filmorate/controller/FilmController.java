@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.UpdateNonExistingEntity;
 
 import javax.validation.Valid;
@@ -14,25 +14,25 @@ import java.util.List;
 @Validated
 @RequestMapping(value = "/films")
 public class FilmController {
-    private FilmStorage filmStorage;
+    private FilmService filmService;
 
     @Autowired
-    public FilmController(FilmStorage filmStorage) {
-        this.filmStorage = filmStorage;
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
     }
 
     @GetMapping
     public List<Film> findAll() {
-        return filmStorage.getAll();
+        return filmService.getAll();
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        return filmStorage.create(film);
+        return filmService.create(film);
     }
 
     @PutMapping
     public Film createOrUpdate(@Valid @RequestBody Film film) throws UpdateNonExistingEntity {
-        return filmStorage.update(film);
+        return filmService.update(film);
     }
 }
