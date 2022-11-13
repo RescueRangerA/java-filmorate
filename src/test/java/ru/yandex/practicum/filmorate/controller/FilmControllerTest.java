@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.UpdateNonExistingEntity;
+import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import javax.validation.Validation;
@@ -96,7 +96,7 @@ public class FilmControllerTest {
         Film updateFilm = new Film(9999L, "Film Updated", "New film update decription", LocalDate.parse("1989-04-17", DateTimeFormatter.ISO_DATE), 190);
         Assertions.assertEquals(Set.of(), validator.validate(film));
 
-        Assertions.assertThrows(UpdateNonExistingEntity.class, () -> controller.createOrUpdate(updateFilm));
+        Assertions.assertThrows(EntityIsNotFoundException.class, () -> controller.createOrUpdate(updateFilm));
     }
 
     void assertEqualsFilms(Film filmExpected, Film filmActual) {

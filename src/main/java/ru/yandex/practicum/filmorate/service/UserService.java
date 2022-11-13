@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UpdateNonExistingEntity;
+import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class UserService {
         return userStorage.create(user);
     }
 
-    public User update(User user) throws UpdateNonExistingEntity {
+    public User update(User user) throws EntityIsNotFoundException {
         return userStorage.update(user);
     }
 }

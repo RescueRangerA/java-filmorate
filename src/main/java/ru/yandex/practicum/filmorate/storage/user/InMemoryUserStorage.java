@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UpdateNonExistingEntity;
+import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,9 +25,9 @@ public class InMemoryUserStorage implements UserStorage {
         return userEntity;
     }
 
-    public User update(User userEntity) throws UpdateNonExistingEntity {
+    public User update(User userEntity) throws EntityIsNotFoundException {
         if (!storage.containsKey(userEntity.getId())) {
-            throw new UpdateNonExistingEntity(userEntity);
+            throw new EntityIsNotFoundException(userEntity);
         }
 
         storage.put(userEntity.getId(), userEntity);

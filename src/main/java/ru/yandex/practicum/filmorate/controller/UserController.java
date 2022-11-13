@@ -5,7 +5,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UpdateNonExistingEntity;
+import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User createOrUpdate(@Valid @RequestBody User user) throws UpdateNonExistingEntity {
+    public User createOrUpdate(@Valid @RequestBody User user) throws EntityIsNotFoundException {
         return userService.update(user);
     }
 }

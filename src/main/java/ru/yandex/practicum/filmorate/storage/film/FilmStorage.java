@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.UpdateNonExistingEntity;
+import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.util.List;
 
@@ -10,5 +10,5 @@ public interface FilmStorage {
 
     Film create(Film filmEntity);
 
-    Film update(Film filmEntity) throws UpdateNonExistingEntity;
+    Film update(Film filmEntity) throws EntityIsNotFoundException;
 }

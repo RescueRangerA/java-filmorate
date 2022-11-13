@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.UpdateNonExistingEntity;
+import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,9 +25,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         return filmEntity;
     }
 
-    public Film update(Film filmEntity) throws UpdateNonExistingEntity {
+    public Film update(Film filmEntity) throws EntityIsNotFoundException {
         if (!storage.containsKey(filmEntity.getId())) {
-            throw new UpdateNonExistingEntity(filmEntity);
+            throw new EntityIsNotFoundException(filmEntity);
         }
 
         storage.put(filmEntity.getId(), filmEntity);

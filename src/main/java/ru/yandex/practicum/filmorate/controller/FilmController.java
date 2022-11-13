@@ -5,7 +5,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.UpdateNonExistingEntity;
+import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -32,7 +32,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film createOrUpdate(@Valid @RequestBody Film film) throws UpdateNonExistingEntity {
+    public Film createOrUpdate(@Valid @RequestBody Film film) throws EntityIsNotFoundException {
         return filmService.update(film);
     }
 }

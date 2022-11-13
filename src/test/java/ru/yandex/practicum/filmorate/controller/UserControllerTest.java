@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UpdateNonExistingEntity;
+import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -89,7 +89,7 @@ public class UserControllerTest {
         User updateUser = new User(9999L, "mail@yandex.ru", "doloreUpdate", "est adipisicing", LocalDate.parse("1976-09-20", DateTimeFormatter.ISO_DATE));
         Assertions.assertEquals(Set.of(), validator.validate(user));
 
-        Assertions.assertThrows(UpdateNonExistingEntity.class, () -> controller.createOrUpdate(updateUser));
+        Assertions.assertThrows(EntityIsNotFoundException.class, () -> controller.createOrUpdate(updateUser));
     }
 
     @Test

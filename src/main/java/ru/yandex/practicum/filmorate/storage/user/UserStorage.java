@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UpdateNonExistingEntity;
+import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.util.List;
 
@@ -10,5 +10,5 @@ public interface UserStorage {
 
     User create(User userEntity);
 
-    User update(User userEntity) throws UpdateNonExistingEntity;
+    User update(User userEntity) throws EntityIsNotFoundException;
 }
