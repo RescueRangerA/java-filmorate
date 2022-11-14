@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.userfriend;
 
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.UserFriend;
 import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
@@ -8,6 +9,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+@Component
 public class InMemoryUserFriendStorage implements UserFriendStorage {
     private final Map<Long, UserFriend> storage = new HashMap<>();
 
@@ -85,13 +87,13 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
         List<Long> friendsB = new LinkedList<>();
 
         for (UserFriend userFriend : storage.values()) {
-            if ( Objects.equals(userFriend.getUserIdA(), userIdA) ) {
+            if (Objects.equals(userFriend.getUserIdA(), userIdA)) {
                 friendsA.add(userFriend.getUserIdB());
-            } else if ( Objects.equals(userFriend.getUserIdB(), userIdA)) {
+            } else if (Objects.equals(userFriend.getUserIdB(), userIdA)) {
                 friendsA.add(userFriend.getUserIdA());
-            } else if ( Objects.equals(userFriend.getUserIdA(), userIdB)) {
+            } else if (Objects.equals(userFriend.getUserIdA(), userIdB)) {
                 friendsB.add(userFriend.getUserIdB());
-            } else if ( Objects.equals(userFriend.getUserIdB(), userIdB)) {
+            } else if (Objects.equals(userFriend.getUserIdB(), userIdB)) {
                 friendsB.add(userFriend.getUserIdA());
             }
         }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.filmlike;
 
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.FilmLike;
 import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
@@ -8,6 +9,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+@Component
 public class InMemoryFilmLikeStorage implements FilmLikeStorage {
     private final Map<Long, FilmLike> storage = new HashMap<>();
 
