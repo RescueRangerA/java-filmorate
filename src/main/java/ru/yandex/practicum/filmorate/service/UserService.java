@@ -10,8 +10,8 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.storage.userfriend.FriendOfHisOwnException;
 import ru.yandex.practicum.filmorate.storage.userfriend.UserFriendStorage;
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -42,29 +42,23 @@ public class UserService {
     }
 
     public UserFriend addFriend(Long userIdA, Long userIdB) throws EntityAlreadyExistsException, FriendOfHisOwnException, EntityIsNotFoundException {
-        userStorage.getById(userIdA);
-        userStorage.getById(userIdB);
-
-        return userFriendStorage.createByUserIds(userIdA, userIdB);
+        return userFriendStorage.createByUserIds(userStorage.getById(userIdA), userStorage.getById(userIdB));
     }
 
     public void removeFriend(Long userIdA, Long userIdB) throws EntityIsNotFoundException {
-        userStorage.getById(userIdA);
-        userStorage.getById(userIdB);
-
-        userFriendStorage.deleteByUserIds(userIdA, userIdB);
+        userFriendStorage.deleteByUserIds(userStorage.getById(userIdA), userStorage.getById(userIdB));
     }
 
-    public List<User> getFriendsInCommon(Long userIdA, Long userIdB) throws EntityIsNotFoundException {
-        userStorage.getById(userIdA);
-        userStorage.getById(userIdB);
-
-        return userStorage.getMany(userFriendStorage.getUserIdsInCommon(userIdA, userIdB));
+    public Set<User> getFriendsInCommon(Long userIdA, Long userIdB) throws EntityIsNotFoundException {
+        return userStorage.getMany(
+                userFriendStorage.getUserIdsInCommon(
+                        userStorage.getById(userIdA),
+                        userStorage.getById(userIdB)
+                )
+        );
     }
 
-    public List<User> getFriends(Long userId) throws EntityIsNotFoundException {
-        userStorage.getById(userId);
-
-        return userStorage.getMany(new LinkedList<>(userFriendStorage.getUserIdsByUserId(userId)));
+    public Set<User> getFriends(Long userId) throws EntityIsNotFoundException {
+        return userStorage.getMany(userFriendStorage.getUserIdsByUser(userStorage.getById(userId)));
     }
 }

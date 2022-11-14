@@ -4,15 +4,16 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.util.List;
+import java.util.Set;
 
 public interface FilmStorage {
     List<Film> getAll();
 
-    List<Film> getFirstN(Integer limit);
+    Set<Film> getFirstN(Integer limit);
 
     Film get(Long filmId) throws EntityIsNotFoundException;
 
-    List<Film> getMany(List<Long> filmIds);
+    Set<Film> getMany(Set<Long> filmIds);
 
     Film create(Film filmEntity);
 

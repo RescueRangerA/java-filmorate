@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.userfriend.FriendOfHisOwnException;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @Validated
@@ -45,7 +46,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/friends")
-    public List<User> getFriends(@PathVariable Long userId) throws EntityIsNotFoundException {
+    public Set<User> getFriends(@PathVariable Long userId) throws EntityIsNotFoundException {
         return userService.getFriends(userId);
     }
 
@@ -60,7 +61,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
-    public List<User> getFriends(@PathVariable Long userId, @PathVariable Long otherId) throws EntityIsNotFoundException {
+    public Set<User> getFriends(@PathVariable Long userId, @PathVariable Long otherId) throws EntityIsNotFoundException {
         return userService.getFriendsInCommon(userId, otherId);
     }
 }

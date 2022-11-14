@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.userfriend;
 
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.UserFriend;
 import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
@@ -36,26 +37,26 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
         return List.copyOf(storage.values());
     }
 
-    public List<Long> getUserIdsByUserId(Long userId) {
+    public Set<Long> getUserIdsByUser(User user) {
         return storage
                 .values()
                 .stream()
                 .map(userFriend -> {
-                    if (Objects.equals(userFriend.getUserIdA(), userId)) {
+                    if (Objects.equals(userFriend.getUserIdA(), user.getId())) {
                         return userFriend.getUserIdB();
-                    } else if (Objects.equals(userFriend.getUserIdB(), userId)) {
+                    } else if (Objects.equals(userFriend.getUserIdB(), user.getId())) {
                         return userFriend.getUserIdA();
                     } else {
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     @Override
-    public UserFriend createByUserIds(Long userIdA, Long userIdB) throws EntityAlreadyExistsException, FriendOfHisOwnException {
-        UserFriend userFriendEntity = new UserFriend(nextId++, userIdA, userIdB);
+    public UserFriend createByUserIds(User userA, User userB) throws EntityAlreadyExistsException, FriendOfHisOwnException {
+        UserFriend userFriendEntity = new UserFriend(nextId++, userA.getId(), userB.getId());
         create(userFriendEntity);
 
         return userFriendEntity;
@@ -84,24 +85,26 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
     }
 
     @Override
-    public void deleteByUserIds(Long userIdA, Long userIdB) throws EntityIsNotFoundException {
+    public void deleteByUserIds(User userA, User userB) throws EntityIsNotFoundException {
         Optional<UserFriend> entityToDelete = storage
                 .values()
                 .stream()
-                .filter(new UserFriendsByUserIdsPredicate(userIdA, userIdB))
+                .filter(new UserFriendsByUserIdsPredicate(userA.getId(), userB.getId()))
                 .findFirst();
 
         if (entityToDelete.isEmpty()) {
-            throw new EntityIsNotFoundException(new UserFriend(0L, userIdA, userIdB));
+            throw new EntityIsNotFoundException(UserFriend.class, 0L);
         }
 
         storage.remove(entityToDelete.get().getId());
     }
 
     @Override
-    public List<Long> getUserIdsInCommon(Long userIdA, Long userIdB) {
+    public Set<Long> getUserIdsInCommon(User userA, User userB) {
         List<Long> friendsA = new LinkedList<>();
         List<Long> friendsB = new LinkedList<>();
+        Long userIdA = userA.getId();
+        Long userIdB = userB.getId();
 
         for (UserFriend userFriend : storage.values()) {
             if (Objects.equals(userFriend.getUserIdA(), userIdA)) {
@@ -115,6 +118,6 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
             }
         }
 
-        return friendsA.stream().filter(friendsB::contains).collect(Collectors.toList());
+        return friendsA.stream().filter(friendsB::contains).collect(Collectors.toSet());
     }
 }

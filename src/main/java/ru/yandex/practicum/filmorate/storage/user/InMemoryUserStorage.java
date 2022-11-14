@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -49,7 +50,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getMany(List<Long> userIds) {
-        return storage.values().stream().filter((user -> userIds.contains(user.getId()))).collect(Collectors.toList());
+    public Set<User> getMany(Set<Long> userIds) {
+        return storage.values().stream().filter((user -> userIds.contains(user.getId()))).collect(Collectors.toSet());
     }
 }

@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.filmlike;
 
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmLike;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
@@ -37,8 +39,8 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
     }
 
     @Override
-    public FilmLike createWithFilmIdAndUserId(Long filmId, Long usedId) throws EntityAlreadyExistsException {
-        FilmLike filmLikeEntity = new FilmLike(nextId++, filmId, usedId);
+    public FilmLike createWithFilmIdAndUserId(Film film, User user) throws EntityAlreadyExistsException {
+        FilmLike filmLikeEntity = new FilmLike(nextId++, film.getId(), user.getId());
         create(filmLikeEntity);
 
         return filmLikeEntity;
@@ -63,22 +65,22 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
     }
 
     @Override
-    public void deleteByFilmIdAndUserId(Long filmId, Long usedId) throws EntityIsNotFoundException {
+    public void deleteByFilmIdAndUserId(Film film, User user) throws EntityIsNotFoundException {
         Optional<FilmLike> entityToDelete = storage
                 .values()
                 .stream()
-                .filter(new FilmLikeByFilmIdAndUserIdPredicate(filmId, usedId))
+                .filter(new FilmLikeByFilmIdAndUserIdPredicate(film.getId(), user.getId()))
                 .findFirst();
 
         if (entityToDelete.isEmpty()) {
-            throw new EntityIsNotFoundException(new FilmLike(0L, filmId, usedId));
+            throw new EntityIsNotFoundException(FilmLike.class, 0L);
         }
 
         storage.remove(entityToDelete.get().getId());
     }
 
     @Override
-    public List<Long> getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit) {
+    public Set<Long> getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit) {
         return storage
                 .values()
                 .stream()
@@ -88,6 +90,6 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
                 .sorted((a, b) -> Integer.compare(b.size(), a.size()))
                 .limit(limit)
                 .map(x -> x.get(0).getFilmId())
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 }

@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.util.List;
+import java.util.Set;
 
 public interface UserStorage {
     List<User> getAll();
@@ -14,5 +15,5 @@ public interface UserStorage {
 
     User getById(Long userId) throws EntityIsNotFoundException;
 
-    List<User> getMany(List<Long> userIds);
+    Set<User> getMany(Set<Long> userIds);
 }

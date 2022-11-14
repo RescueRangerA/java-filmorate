@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.filmlike.FilmLikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class FilmService {
@@ -44,21 +45,15 @@ public class FilmService {
     }
 
     public FilmLike addLike(Long filmId, Long userId) throws EntityAlreadyExistsException, EntityIsNotFoundException {
-        filmStorage.get(filmId);
-        userStorage.getById(userId);
-
-        return filmLikeStorage.createWithFilmIdAndUserId(filmId, userId);
+        return filmLikeStorage.createWithFilmIdAndUserId(filmStorage.get(filmId), userStorage.getById(userId));
     }
 
     public void removeLike(Long filmId, Long userId) throws EntityIsNotFoundException {
-        filmStorage.get(filmId);
-        userStorage.getById(userId);
-
-        filmLikeStorage.deleteByFilmIdAndUserId(filmId, userId);
+        filmLikeStorage.deleteByFilmIdAndUserId(filmStorage.get(filmId), userStorage.getById(userId));
     }
 
-    public List<Film> getPopularFilms(Integer limit) {
-        List<Film> popularFilms = filmStorage.getMany(
+    public Set<Film> getPopularFilms(Integer limit) {
+        Set<Film> popularFilms = filmStorage.getMany(
                 filmLikeStorage.getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(limit)
         );
 
