@@ -11,4 +11,8 @@ public interface UserStorage {
     User create(User userEntity);
 
     User update(User userEntity) throws EntityIsNotFoundException;
+
+    User getById(Long userId) throws EntityIsNotFoundException;
+
+    List<User> getMany(List<Long> userIds);
 }

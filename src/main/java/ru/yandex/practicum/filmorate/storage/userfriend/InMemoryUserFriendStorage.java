@@ -36,6 +36,23 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
         return List.copyOf(storage.values());
     }
 
+    public List<Long> getUserIdsByUserId(Long userId) {
+        return storage
+                .values()
+                .stream()
+                .map(userFriend -> {
+                    if (Objects.equals(userFriend.getUserIdA(), userId)) {
+                        return userFriend.getUserIdB();
+                    } else if (Objects.equals(userFriend.getUserIdB(), userId)) {
+                        return userFriend.getUserIdA();
+                    } else {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
     @Override
     public UserFriend createByUserIds(Long userIdA, Long userIdB) throws EntityAlreadyExistsException, FriendOfHisOwnException {
         UserFriend userFriendEntity = new UserFriend(nextId++, userIdA, userIdB);

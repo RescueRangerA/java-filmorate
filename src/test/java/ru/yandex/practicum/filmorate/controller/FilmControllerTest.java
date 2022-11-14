@@ -7,6 +7,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.filmlike.InMemoryFilmLikeStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -23,7 +25,7 @@ public class FilmControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        controller = new FilmController(new FilmService(new InMemoryFilmStorage()));
+        controller = new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryFilmLikeStorage(), new InMemoryUserStorage()));
     }
 
     @Test

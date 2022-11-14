@@ -8,6 +8,12 @@ import java.util.List;
 public interface FilmStorage {
     List<Film> getAll();
 
+    List<Film> getFirstN(Integer limit);
+
+    Film get(Long filmId) throws EntityIsNotFoundException;
+
+    List<Film> getMany(List<Long> filmIds);
+
     Film create(Film filmEntity);
 
     Film update(Film filmEntity) throws EntityIsNotFoundException;

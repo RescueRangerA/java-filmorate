@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -17,6 +18,24 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public List<Film> getAll() {
         return List.copyOf(storage.values());
+    }
+
+    public List<Film> getFirstN(Integer limit) {
+        return storage.values().stream().limit(limit).collect(Collectors.toList());
+    }
+
+    @Override
+    public Film get(Long filmId) throws EntityIsNotFoundException {
+        if (!storage.containsKey(filmId)) {
+            throw new EntityIsNotFoundException(Film.class, filmId);
+        }
+
+        return storage.get(filmId);
+    }
+
+    @Override
+    public List<Film> getMany(List<Long> filmIds) {
+        return storage.values().stream().filter((film -> filmIds.contains(film.getId()))).collect(Collectors.toList());
     }
 
     @Override

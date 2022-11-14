@@ -6,9 +6,11 @@ import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.util.List;
 
-interface UserFriendStorage {
+public interface UserFriendStorage {
 
     List<UserFriend> getAll();
+
+    List<Long> getUserIdsByUserId(Long userId);
 
     UserFriend createByUserIds(Long userIdA, Long userIdB) throws EntityAlreadyExistsException, FriendOfHisOwnException;
 
