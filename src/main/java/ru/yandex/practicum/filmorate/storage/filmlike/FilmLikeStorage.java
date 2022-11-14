@@ -13,5 +13,5 @@ public interface FilmLikeStorage {
 
     void deleteByFilmIdAndUserId(Long filmId, Long usedId) throws EntityIsNotFoundException;
 
-    List<List<FilmLike>> getAllAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit);
+    List<Long> getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit);
 }

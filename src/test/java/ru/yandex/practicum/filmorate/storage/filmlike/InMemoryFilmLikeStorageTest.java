@@ -3,11 +3,9 @@ package ru.yandex.practicum.filmorate.storage.filmlike;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.model.FilmLike;
 import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 class InMemoryFilmLikeStorageTest {
@@ -53,26 +51,23 @@ class InMemoryFilmLikeStorageTest {
 
     @Test()
     void getAllAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN() throws EntityAlreadyExistsException {
-        List<List<FilmLike>> expected = new ArrayList<>();
-        expected.add(new ArrayList<>());
-        expected.add(new ArrayList<>());
-        expected.add(new ArrayList<>());
-
-        expected.get(2).add(storage.createWithFilmIdAndUserId(1L, 1L));
-        expected.get(0).add(storage.createWithFilmIdAndUserId(2L, 1L));
+        storage.createWithFilmIdAndUserId(1L, 1L);
+        storage.createWithFilmIdAndUserId(2L, 1L);
         storage.createWithFilmIdAndUserId(3L, 1L);
-        expected.get(1).add(storage.createWithFilmIdAndUserId(4L, 1L));
+        storage.createWithFilmIdAndUserId(4L, 1L);
         storage.createWithFilmIdAndUserId(5L, 1L);
         storage.createWithFilmIdAndUserId(6L, 1L);
         storage.createWithFilmIdAndUserId(7L, 1L);
         storage.createWithFilmIdAndUserId(8L, 1L);
         storage.createWithFilmIdAndUserId(9L, 1L);
         storage.createWithFilmIdAndUserId(10L, 1L);
-        expected.get(0).add(storage.createWithFilmIdAndUserId(2L, 2L));
-        expected.get(1).add(storage.createWithFilmIdAndUserId(4L, 2L));
-        expected.get(0).add(storage.createWithFilmIdAndUserId(2L, 3L));
+        storage.createWithFilmIdAndUserId(2L, 2L);
+        storage.createWithFilmIdAndUserId(4L, 2L);
+        storage.createWithFilmIdAndUserId(2L, 3L);
 
-
-        Assertions.assertEquals(expected, storage.getAllAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(3));
+        Assertions.assertEquals(
+                List.of(2L, 4L, 1L),
+                storage.getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(3)
+        );
     }
 }

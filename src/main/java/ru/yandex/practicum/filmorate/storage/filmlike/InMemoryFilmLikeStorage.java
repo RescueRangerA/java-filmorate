@@ -76,7 +76,7 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
     }
 
     @Override
-    public List<List<FilmLike>> getAllAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit) {
+    public List<Long> getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit) {
         return storage
                 .values()
                 .stream()
@@ -85,6 +85,7 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
                 .stream()
                 .sorted((a, b) -> Integer.compare(b.size(), a.size()))
                 .limit(limit)
+                .map(x -> x.get(0).getFilmId())
                 .collect(Collectors.toList());
     }
 }
