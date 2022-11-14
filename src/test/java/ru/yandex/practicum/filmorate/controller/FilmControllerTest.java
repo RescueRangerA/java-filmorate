@@ -19,9 +19,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FilmControllerTest {
-    FilmController controller;
-    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    Validator validator = factory.getValidator();
+    private FilmController controller;
+    private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    private final Validator validator = factory.getValidator();
 
     @BeforeEach
     void beforeEach() {

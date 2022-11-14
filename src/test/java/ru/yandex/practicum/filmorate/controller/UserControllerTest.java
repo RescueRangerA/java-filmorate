@@ -18,9 +18,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class UserControllerTest {
-    UserController controller;
-    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    Validator validator = factory.getValidator();
+    private UserController controller;
+    private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    private final Validator validator = factory.getValidator();
 
     @BeforeEach
     void beforeEach() {
