@@ -14,10 +14,12 @@ public class InMemoryUserStorage implements UserStorage {
 
     private long nextId = 1L;
 
+    @Override
     public List<User> getAll() {
         return List.copyOf(storage.values());
     }
 
+    @Override
     public User create(User userEntity) {
         userEntity.setId(nextId++);
         storage.put(userEntity.getId(), userEntity);
@@ -25,6 +27,7 @@ public class InMemoryUserStorage implements UserStorage {
         return userEntity;
     }
 
+    @Override
     public User update(User userEntity) throws EntityIsNotFoundException {
         if (!storage.containsKey(userEntity.getId())) {
             throw new EntityIsNotFoundException(userEntity);

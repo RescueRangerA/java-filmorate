@@ -14,10 +14,12 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     private long nextId = 1L;
 
+    @Override
     public List<Film> getAll() {
         return List.copyOf(storage.values());
     }
 
+    @Override
     public Film create(Film filmEntity) {
         filmEntity.setId(nextId++);
         storage.put(filmEntity.getId(), filmEntity);
@@ -25,6 +27,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return filmEntity;
     }
 
+    @Override
     public Film update(Film filmEntity) throws EntityIsNotFoundException {
         if (!storage.containsKey(filmEntity.getId())) {
             throw new EntityIsNotFoundException(filmEntity);
