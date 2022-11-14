@@ -2,15 +2,16 @@ package ru.yandex.practicum.filmorate.model;
 
 import java.time.LocalDate;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 import org.springframework.lang.Nullable;
 import ru.yandex.practicum.filmorate.validation.constraints.AfterTheDate;
 
 import javax.validation.constraints.*;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class Film implements Entity {
     @Positive
     @Nullable
