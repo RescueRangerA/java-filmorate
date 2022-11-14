@@ -3,19 +3,12 @@ package ru.yandex.practicum.filmorate.storage.filmlike;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.model.FilmLike;
-import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryFilmLikeStorageTest {
 
