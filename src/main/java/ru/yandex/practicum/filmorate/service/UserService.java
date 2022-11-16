@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.userfriend.FriendOfHisOwnException;
 import ru.yandex.practicum.filmorate.storage.userfriend.UserFriendStorage;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class UserService {
@@ -49,7 +48,7 @@ public class UserService {
         userFriendStorage.deleteByUserIds(userStorage.getById(userIdA), userStorage.getById(userIdB));
     }
 
-    public Set<User> getFriendsInCommon(Long userIdA, Long userIdB) throws EntityIsNotFoundException {
+    public List<User> getFriendsInCommon(Long userIdA, Long userIdB) throws EntityIsNotFoundException {
         return userStorage.getMany(
                 userFriendStorage.getUserIdsInCommon(
                         userStorage.getById(userIdA),
@@ -58,7 +57,7 @@ public class UserService {
         );
     }
 
-    public Set<User> getFriends(Long userId) throws EntityIsNotFoundException {
+    public List<User> getFriends(Long userId) throws EntityIsNotFoundException {
         return userStorage.getMany(userFriendStorage.getUserIdsByUser(userStorage.getById(userId)));
     }
 }

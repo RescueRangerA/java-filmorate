@@ -5,53 +5,23 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.UserFriend;
 import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
+import ru.yandex.practicum.filmorate.util.BiDirectedGraph;
 
 import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Component
 public class InMemoryUserFriendStorage implements UserFriendStorage {
-    private final Map<Long, UserFriend> storage = new HashMap<>();
+    private final BiDirectedGraph<Long, UserFriend> storage = new BiDirectedGraph<>();
 
     private long nextId = 1L;
 
-    static class UserFriendsByUserIdsPredicate implements Predicate<UserFriend> {
-        private final Long userIdA;
-        private final Long userIdB;
-
-        public UserFriendsByUserIdsPredicate(Long userIdA, Long userIdB) {
-            this.userIdA = userIdA;
-            this.userIdB = userIdB;
-        }
-
-        @Override
-        public boolean test(UserFriend userFriend) {
-            return Objects.equals(userFriend.getUserIdA(), userIdA) && Objects.equals(userFriend.getUserIdB(), userIdB)
-                    || Objects.equals(userFriend.getUserIdA(), userIdB) && Objects.equals(userFriend.getUserIdB(), userIdA);
-        }
-    }
-
     @Override
     public List<UserFriend> getAll() {
-        return List.copyOf(storage.values());
+        return storage.getEdges();
     }
 
-    public Set<Long> getUserIdsByUser(User user) {
-        return storage
-                .values()
-                .stream()
-                .map(userFriend -> {
-                    if (Objects.equals(userFriend.getUserIdA(), user.getId())) {
-                        return userFriend.getUserIdB();
-                    } else if (Objects.equals(userFriend.getUserIdB(), user.getId())) {
-                        return userFriend.getUserIdA();
-                    } else {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+    public List<Long> getUserIdsByUser(User user) {
+        return new LinkedList<>(storage.getEdgesOfVertex(user.getId()).keySet());
     }
 
     @Override
@@ -63,7 +33,13 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
     }
 
     public UserFriend create(UserFriend userFriendEntity) throws EntityAlreadyExistsException, FriendOfHisOwnException {
-        if (storage.containsKey(userFriendEntity.getId())) {
+        Long userA = userFriendEntity.getUserIdA();
+        Long userB = userFriendEntity.getUserIdB();
+
+        storage.addVertex(userA);
+        storage.addVertex(userB);
+
+        if (storage.getEdge(userA, userB) != null) {
             throw new EntityAlreadyExistsException(userFriendEntity);
         }
 
@@ -71,53 +47,26 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
             throw new FriendOfHisOwnException(userFriendEntity);
         }
 
-        if (
-                storage.values().stream().anyMatch(
-                        new UserFriendsByUserIdsPredicate(userFriendEntity.getUserIdA(), userFriendEntity.getUserIdB())
-                )
-        ) {
-            throw new EntityAlreadyExistsException(userFriendEntity);
-        }
-
-        storage.put(userFriendEntity.getId(), userFriendEntity);
+        storage.addEdge(userA, userB, userFriendEntity);
 
         return userFriendEntity;
     }
 
     @Override
     public void deleteByUserIds(User userA, User userB) throws EntityIsNotFoundException {
-        Optional<UserFriend> entityToDelete = storage
-                .values()
-                .stream()
-                .filter(new UserFriendsByUserIdsPredicate(userA.getId(), userB.getId()))
-                .findFirst();
-
-        if (entityToDelete.isEmpty()) {
+        if (storage.getEdge(userA.getId(), userB.getId()) == null) {
             throw new EntityIsNotFoundException(UserFriend.class, 0L);
         }
 
-        storage.remove(entityToDelete.get().getId());
+        storage.removeEdge(userA.getId(), userB.getId());
     }
 
     @Override
-    public Set<Long> getUserIdsInCommon(User userA, User userB) {
-        List<Long> friendsA = new LinkedList<>();
-        List<Long> friendsB = new LinkedList<>();
-        Long userIdA = userA.getId();
-        Long userIdB = userB.getId();
+    public List<Long> getUserIdsInCommon(User userA, User userB) {
+        Set<Long> friendsA = storage.getEdgesOfVertex(userA.getId()).keySet();
+        Set<Long> friendsB = storage.getEdgesOfVertex(userB.getId()).keySet();
+        friendsA.retainAll(friendsB);
 
-        for (UserFriend userFriend : storage.values()) {
-            if (Objects.equals(userFriend.getUserIdA(), userIdA)) {
-                friendsA.add(userFriend.getUserIdB());
-            } else if (Objects.equals(userFriend.getUserIdB(), userIdA)) {
-                friendsA.add(userFriend.getUserIdA());
-            } else if (Objects.equals(userFriend.getUserIdA(), userIdB)) {
-                friendsB.add(userFriend.getUserIdB());
-            } else if (Objects.equals(userFriend.getUserIdB(), userIdB)) {
-                friendsB.add(userFriend.getUserIdA());
-            }
-        }
-
-        return friendsA.stream().filter(friendsB::contains).collect(Collectors.toSet());
+        return new LinkedList<>(friendsA);
     }
 }

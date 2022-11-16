@@ -4,10 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -21,8 +18,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         return List.copyOf(storage.values());
     }
 
-    public Set<Film> getFirstN(Integer limit) {
-        return storage.values().stream().limit(limit).collect(Collectors.toSet());
+    public List<Film> getFirstN(Integer limit) {
+        return storage.values().stream().limit(limit).collect(Collectors.toList());
     }
 
     @Override
@@ -37,8 +34,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Set<Film> getMany(Set<Long> filmIds) {
-        return storage.values().stream().filter((film -> filmIds.contains(film.getId()))).collect(Collectors.toSet());
+    public List<Film> getMany(List<Long> filmIds) {
+        return filmIds.stream().map(storage::get).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @Override

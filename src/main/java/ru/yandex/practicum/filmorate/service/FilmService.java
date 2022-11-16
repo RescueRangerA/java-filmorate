@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.filmlike.FilmLikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class FilmService {
@@ -52,13 +51,21 @@ public class FilmService {
         filmLikeStorage.deleteByFilmIdAndUserId(filmStorage.get(filmId), userStorage.getById(userId));
     }
 
-    public Set<Film> getPopularFilms(Integer limit) {
-        Set<Film> popularFilms = filmStorage.getMany(
+    public List<Film> getPopularFilms(Integer limit) {
+        List<Film> popularFilms = filmStorage.getMany(
                 filmLikeStorage.getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(limit)
         );
 
         if (popularFilms.size() < limit) {
-            popularFilms.addAll(filmStorage.getFirstN(limit - popularFilms.size()));
+            for (Film film : filmStorage.getFirstN(limit)) {
+                if ( popularFilms.size() == limit ) {
+                    break;
+                }
+
+                if ( ! popularFilms.contains(film) ) {
+                    popularFilms.add(film);
+                }
+            }
         }
 
         return popularFilms;

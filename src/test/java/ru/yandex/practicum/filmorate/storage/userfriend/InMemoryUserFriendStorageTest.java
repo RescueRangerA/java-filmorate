@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Set;
+import java.util.List;
 
 class InMemoryUserFriendStorageTest {
 
@@ -95,6 +95,6 @@ class InMemoryUserFriendStorageTest {
 
         storage.createByUserIds(user6, user1);
 
-        Assertions.assertEquals(Set.of(3L, 6L), storage.getUserIdsInCommon(user1, user2));
+        Assertions.assertEquals(List.of(3L, 6L), storage.getUserIdsInCommon(user1, user2));
     }
 }

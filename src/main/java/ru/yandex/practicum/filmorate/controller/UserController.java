@@ -11,8 +11,6 @@ import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.userfriend.FriendOfHisOwnException;
 
 import javax.validation.Valid;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 @RestController
@@ -48,10 +46,7 @@ public class UserController {
 
     @GetMapping("/{userId}/friends")
     public List<User> getFriends(@PathVariable Long userId) throws EntityIsNotFoundException {
-        List<User> result = new LinkedList<>(userService.getFriends(userId));
-        result.sort(Comparator.comparing(User::getId));
-
-        return result;
+        return userService.getFriends(userId);
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
@@ -66,9 +61,6 @@ public class UserController {
 
     @GetMapping("/{userId}/friends/common/{otherId}")
     public List<User> getFriends(@PathVariable Long userId, @PathVariable Long otherId) throws EntityIsNotFoundException {
-        List<User> result = new LinkedList<>(userService.getFriendsInCommon(userId, otherId));
-        result.sort(Comparator.comparing(User::getId));
-
-        return result;
+        return userService.getFriendsInCommon(userId, otherId);
     }
 }

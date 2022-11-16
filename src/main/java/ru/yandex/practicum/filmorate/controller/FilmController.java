@@ -10,8 +10,6 @@ import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import javax.validation.Valid;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 @RestController
@@ -57,9 +55,6 @@ public class FilmController {
 
     @GetMapping("/popular")
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
-        List<Film> result = new LinkedList<>(filmService.getPopularFilms(count));
-        result.sort(Comparator.comparing(Film::getId));
-
-        return result;
+        return filmService.getPopularFilms(count);
     }
 }

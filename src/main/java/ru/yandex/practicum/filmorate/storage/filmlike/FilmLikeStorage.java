@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.util.List;
-import java.util.Set;
 
 public interface FilmLikeStorage {
     List<FilmLike> getAll();
@@ -16,5 +15,5 @@ public interface FilmLikeStorage {
 
     void deleteByFilmIdAndUserId(Film film, User user) throws EntityIsNotFoundException;
 
-    Set<Long> getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit);
+    List<Long> getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit);
 }

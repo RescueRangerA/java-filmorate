@@ -6,17 +6,16 @@ import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.util.List;
-import java.util.Set;
 
 public interface UserFriendStorage {
 
     List<UserFriend> getAll();
 
-    Set<Long> getUserIdsByUser(User user);
+    List<Long> getUserIdsByUser(User user);
 
     UserFriend createByUserIds(User userA, User userB) throws EntityAlreadyExistsException, FriendOfHisOwnException;
 
     void deleteByUserIds(User userA, User userB) throws EntityIsNotFoundException;
 
-    Set<Long> getUserIdsInCommon(User userA, User userB);
+    List<Long> getUserIdsInCommon(User userA, User userB);
 }

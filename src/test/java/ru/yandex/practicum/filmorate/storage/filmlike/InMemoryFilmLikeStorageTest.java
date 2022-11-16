@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Set;
+import java.util.List;
 
 class InMemoryFilmLikeStorageTest {
 
@@ -98,7 +98,7 @@ class InMemoryFilmLikeStorageTest {
         storage.createWithFilmIdAndUserId(film2, user3);
 
         Assertions.assertEquals(
-                Set.of(2L, 4L, 1L),
+                List.of(2L, 4L, 1L),
                 storage.getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(3)
         );
     }
