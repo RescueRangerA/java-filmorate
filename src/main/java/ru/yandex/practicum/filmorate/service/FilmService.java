@@ -15,11 +15,11 @@ import java.util.Set;
 
 @Service
 public class FilmService {
-    private FilmStorage filmStorage;
+    final private FilmStorage filmStorage;
 
-    private FilmLikeStorage filmLikeStorage;
+    final private FilmLikeStorage filmLikeStorage;
 
-    private UserStorage userStorage;
+    final private UserStorage userStorage;
 
     @Autowired
     public FilmService(FilmStorage filmStorage, FilmLikeStorage filmLikeStorage, UserStorage userStorage) {

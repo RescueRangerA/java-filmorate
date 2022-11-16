@@ -15,9 +15,9 @@ import java.util.Set;
 
 @Service
 public class UserService {
-    private UserStorage userStorage;
+    final private UserStorage userStorage;
 
-    private UserFriendStorage userFriendStorage;
+    final private UserFriendStorage userFriendStorage;
 
     @Autowired
     public UserService(UserStorage userStorage, UserFriendStorage userFriendStorage) {
