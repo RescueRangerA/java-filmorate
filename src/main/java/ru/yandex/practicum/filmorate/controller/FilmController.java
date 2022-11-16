@@ -41,7 +41,7 @@ public class FilmController {
     }
 
     @GetMapping("/{filmId}")
-    public Film addLike(@PathVariable Long filmId) throws EntityIsNotFoundException {
+    public Film getFilm(@PathVariable Long filmId) throws EntityIsNotFoundException {
         return filmService.getById(filmId);
     }
 
