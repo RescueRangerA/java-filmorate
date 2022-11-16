@@ -27,11 +27,13 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film get(Long filmId) throws EntityIsNotFoundException {
-        if (!storage.containsKey(filmId)) {
+        Film film = storage.get(filmId);
+
+        if (film == null) {
             throw new EntityIsNotFoundException(Film.class, filmId);
         }
 
-        return storage.get(filmId);
+        return film;
     }
 
     @Override

@@ -42,11 +42,13 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getById(Long userId) throws EntityIsNotFoundException {
-        if (!storage.containsKey(userId)) {
+        User user = storage.get(userId);
+
+        if (user == null) {
             throw new EntityIsNotFoundException(User.class, userId);
         }
 
-        return storage.get(userId);
+        return user;
     }
 
     @Override
