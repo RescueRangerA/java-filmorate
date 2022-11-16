@@ -14,9 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@RestControllerAdvice("ru.yandex.practicum.filmorate.controller")
+@RestControllerAdvice
 @Slf4j
-public class ExceptionHandler {
+public class ExceptionControllerAdvice {
     @org.springframework.web.bind.annotation.ExceptionHandler
     public void handleEntityIsNotFoundException(final EntityIsNotFoundException e, HttpServletResponse response) throws IOException {
         logIfNeeded(e);
