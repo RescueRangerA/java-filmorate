@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
@@ -17,31 +18,31 @@ import java.io.IOException;
 @RestControllerAdvice
 @Slf4j
 public class ExceptionControllerAdvice {
-    @org.springframework.web.bind.annotation.ExceptionHandler
+    @ExceptionHandler
     public void handleEntityIsNotFoundException(final EntityIsNotFoundException e, HttpServletResponse response) throws IOException {
         logIfNeeded(e);
         response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler
+    @ExceptionHandler
     public void handleValidationException(final ValidationException e, HttpServletResponse response) throws IOException {
         logIfNeeded(e);
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler
+    @ExceptionHandler
     public void handleValidationException(final EntityAlreadyExistsException e, HttpServletResponse response) throws IOException {
         logIfNeeded(e);
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler
+    @ExceptionHandler
     public void handleValidationException(final FriendOfHisOwnException e, HttpServletResponse response) throws IOException {
         logIfNeeded(e);
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler
+    @ExceptionHandler
     public ModelAndView handleValidationException(
             HttpServletRequest request,
             HttpServletResponse response,
