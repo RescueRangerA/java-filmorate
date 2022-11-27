@@ -4,6 +4,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.filmlike.InMemoryFilmLikeStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -14,13 +19,13 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class FilmControllerTest {
-    FilmController controller;
-    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    Validator validator = factory.getValidator();
+    private FilmController controller;
+    private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    private final Validator validator = factory.getValidator();
 
     @BeforeEach
     void beforeEach() {
-        controller = new FilmController();
+        controller = new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryFilmLikeStorage(), new InMemoryUserStorage()));
     }
 
     @Test
@@ -93,7 +98,7 @@ public class FilmControllerTest {
         Film updateFilm = new Film(9999L, "Film Updated", "New film update decription", LocalDate.parse("1989-04-17", DateTimeFormatter.ISO_DATE), 190);
         Assertions.assertEquals(Set.of(), validator.validate(film));
 
-        Assertions.assertThrows(ValidationException.class, () -> controller.createOrUpdate(updateFilm));
+        Assertions.assertThrows(EntityIsNotFoundException.class, () -> controller.createOrUpdate(updateFilm));
     }
 
     void assertEqualsFilms(Film filmExpected, Film filmActual) {

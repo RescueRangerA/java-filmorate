@@ -4,6 +4,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
+import ru.yandex.practicum.filmorate.storage.userfriend.InMemoryUserFriendStorage;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -14,13 +18,13 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class UserControllerTest {
-    UserController controller;
-    ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    Validator validator = factory.getValidator();
+    private UserController controller;
+    private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    private final Validator validator = factory.getValidator();
 
     @BeforeEach
     void beforeEach() {
-        controller = new UserController();
+        controller = new UserController(new UserService(new InMemoryUserStorage(), new InMemoryUserFriendStorage()));
     }
 
     @Test
@@ -86,7 +90,7 @@ public class UserControllerTest {
         User updateUser = new User(9999L, "mail@yandex.ru", "doloreUpdate", "est adipisicing", LocalDate.parse("1976-09-20", DateTimeFormatter.ISO_DATE));
         Assertions.assertEquals(Set.of(), validator.validate(user));
 
-        Assertions.assertThrows(ValidationException.class, () -> controller.createOrUpdate(updateUser));
+        Assertions.assertThrows(EntityIsNotFoundException.class, () -> controller.createOrUpdate(updateUser));
     }
 
     @Test
