@@ -9,7 +9,7 @@ import javax.validation.constraints.Positive;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FilmLike implements Entity {
+public class FilmLike {
     @Positive
     @Nullable
     private Long id;

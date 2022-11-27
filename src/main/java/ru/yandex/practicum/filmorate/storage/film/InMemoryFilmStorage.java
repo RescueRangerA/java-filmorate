@@ -49,7 +49,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film update(Film filmEntity) throws EntityIsNotFoundException {
         if (!storage.containsKey(filmEntity.getId())) {
-            throw new EntityIsNotFoundException(filmEntity);
+            throw new EntityIsNotFoundException(Film.class, filmEntity.getId());
         }
 
         storage.put(filmEntity.getId(), filmEntity);

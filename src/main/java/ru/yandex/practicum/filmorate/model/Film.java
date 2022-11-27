@@ -12,7 +12,7 @@ import javax.validation.constraints.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Film implements Entity {
+public class Film {
     @Positive
     @Nullable
     private Long id;

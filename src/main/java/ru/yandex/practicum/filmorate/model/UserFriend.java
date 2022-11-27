@@ -9,7 +9,7 @@ import javax.validation.constraints.Positive;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserFriend implements Entity {
+public class UserFriend {
     @Positive
     @Nullable
     private Long id;

@@ -32,7 +32,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User update(User userEntity) throws EntityIsNotFoundException {
         if (!storage.containsKey(userEntity.getId())) {
-            throw new EntityIsNotFoundException(userEntity);
+            throw new EntityIsNotFoundException(User.class, userEntity.getId());
         }
 
         storage.put(userEntity.getId(), userEntity);
