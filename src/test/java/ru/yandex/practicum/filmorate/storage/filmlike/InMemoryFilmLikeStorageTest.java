@@ -23,7 +23,7 @@ class InMemoryFilmLikeStorageTest {
 
     @Test
     void createWithFilmIdAndUserId() throws EntityAlreadyExistsException {
-        Film film = new Film(1L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
+        Film film = new Film(1L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
         User user = new User(1L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
 
         storage.createWithFilmIdAndUserId(film, user);
@@ -32,7 +32,7 @@ class InMemoryFilmLikeStorageTest {
 
     @Test
     void createWithFilmIdAndUserIdDuplicate() throws EntityAlreadyExistsException {
-        Film film = new Film(1L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
+        Film film = new Film(1L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
         User user = new User(1L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
 
         storage.createWithFilmIdAndUserId(film, user);
@@ -46,7 +46,7 @@ class InMemoryFilmLikeStorageTest {
 
     @Test
     void deleteByFilmIdAndUserId() throws EntityAlreadyExistsException, EntityIsNotFoundException {
-        Film film = new Film(1L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
+        Film film = new Film(1L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
         User user = new User(1L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
 
         storage.createWithFilmIdAndUserId(film, user);
@@ -56,7 +56,7 @@ class InMemoryFilmLikeStorageTest {
 
     @Test
     void deleteNonExistingByFilmIdAndUserId() {
-        Film film = new Film(1L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
+        Film film = new Film(1L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
         User user = new User(1L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
 
         Assertions.assertThrows(
@@ -67,16 +67,16 @@ class InMemoryFilmLikeStorageTest {
 
     @Test()
     void getAllAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN() throws EntityAlreadyExistsException {
-        Film film1 = new Film(1L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
-        Film film2 = new Film(2L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
-        Film film3 = new Film(3L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
-        Film film4 = new Film(4L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
-        Film film5 = new Film(5L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
-        Film film6 = new Film(6L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
-        Film film7 = new Film(7L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
-        Film film8 = new Film(8L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
-        Film film9 = new Film(9L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
-        Film film10 = new Film(10L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
+        Film film1 = new Film(1L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
+        Film film2 = new Film(2L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
+        Film film3 = new Film(3L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
+        Film film4 = new Film(4L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
+        Film film5 = new Film(5L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
+        Film film6 = new Film(6L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
+        Film film7 = new Film(7L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
+        Film film8 = new Film(8L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
+        Film film9 = new Film(9L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
+        Film film10 = new Film(10L, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
 
         User user1 = new User(1L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
         User user2 = new User(2L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));

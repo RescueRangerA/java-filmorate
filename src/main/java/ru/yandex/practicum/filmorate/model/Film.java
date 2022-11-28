@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
 public class Film {
     @Positive
     @Nullable
-    private Long id;
+    private Long filmId;
 
     @NotBlank
     @NotNull
@@ -32,4 +32,7 @@ public class Film {
     @Positive
     @NotNull
     private Integer duration;
+
+    @Positive
+    private Long ratingId;
 }

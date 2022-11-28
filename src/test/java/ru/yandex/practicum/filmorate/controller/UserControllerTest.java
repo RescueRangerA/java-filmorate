@@ -34,7 +34,7 @@ public class UserControllerTest {
         Assertions.assertEquals(Set.of(), validator.validate(user));
         User createdUser = controller.create(user);
 
-        Assertions.assertEquals(1L, createdUser.getId());
+        Assertions.assertEquals(1L, createdUser.getUserId());
         assertEqualsUsers(user, createdUser);
     }
 
@@ -66,7 +66,7 @@ public class UserControllerTest {
         Assertions.assertEquals(Set.of(), validator.validate(user));
         User createdUser = controller.create(user);
 
-        Assertions.assertEquals(1L, createdUser.getId());
+        Assertions.assertEquals(1L, createdUser.getUserId());
         assertEqualsUsers(user, createdUser);
 
         User updateUser = new User(1L, "mail@yandex.ru", "doloreUpdate", "est adipisicing", LocalDate.parse("1976-09-20", DateTimeFormatter.ISO_DATE));
@@ -84,7 +84,7 @@ public class UserControllerTest {
         Assertions.assertEquals(Set.of(), validator.validate(user));
         User createdUser = controller.create(user);
 
-        Assertions.assertEquals(1L, createdUser.getId());
+        Assertions.assertEquals(1L, createdUser.getUserId());
         assertEqualsUsers(user, createdUser);
 
         User updateUser = new User(9999L, "mail@yandex.ru", "doloreUpdate", "est adipisicing", LocalDate.parse("1976-09-20", DateTimeFormatter.ISO_DATE));

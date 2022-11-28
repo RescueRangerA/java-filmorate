@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
-import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.Positive;
 
@@ -10,13 +9,22 @@ import javax.validation.constraints.Positive;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserFriend {
-    @Positive
-    @Nullable
-    private Long id;
+    public enum Status {
+        PENDING, CONFIRMED
+    }
+
+    public UserFriend(Long fromUserId, Long toUserId) {
+        this.fromUserId = fromUserId;
+        this.toUserId = toUserId;
+        this.status = Status.PENDING;
+    }
 
     @Positive
-    private Long userIdA;
+    private Long fromUserId;
 
     @Positive
-    private Long userIdB;
+    private Long toUserId;
+
+    @Positive
+    private Status status;
 }

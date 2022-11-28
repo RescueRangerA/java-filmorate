@@ -23,19 +23,19 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User create(User userEntity) {
-        userEntity.setId(nextId++);
-        storage.put(userEntity.getId(), userEntity);
+        userEntity.setUserId(nextId++);
+        storage.put(userEntity.getUserId(), userEntity);
 
         return userEntity;
     }
 
     @Override
     public User update(User userEntity) throws EntityIsNotFoundException {
-        if (!storage.containsKey(userEntity.getId())) {
-            throw new EntityIsNotFoundException(User.class, userEntity.getId());
+        if (!storage.containsKey(userEntity.getUserId())) {
+            throw new EntityIsNotFoundException(User.class, userEntity.getUserId());
         }
 
-        storage.put(userEntity.getId(), userEntity);
+        storage.put(userEntity.getUserId(), userEntity);
 
         return userEntity;
     }

@@ -30,54 +30,54 @@ public class FilmControllerTest {
 
     @Test
     void create() {
-        Film film = new Film(null, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
+        Film film = new Film(null, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
 
         Assertions.assertEquals(Set.of(), validator.validate(film));
         Film createdFilm = controller.create(film);
 
-        Assertions.assertEquals(1L, createdFilm.getId());
+        Assertions.assertEquals(1L, createdFilm.getFilmId());
         assertEqualsFilms(film, createdFilm);
     }
 
     @Test
     void validateFailName() {
-        Film film = new Film(null, "", "Description", LocalDate.parse("1900-03-25", DateTimeFormatter.ISO_DATE), 200);
+        Film film = new Film(null, "", "Description", LocalDate.parse("1900-03-25", DateTimeFormatter.ISO_DATE), 200, 1L);
 
         Assertions.assertEquals(1, validator.validate(film).size());
     }
 
     @Test
     void validateFailDescription() {
-        Film film = new Film(null, "Film name", "Пятеро друзей ( комик-группа «Шарло»), приезжают в город Бризуль. Здесь они хотят разыскать господина Огюста Куглова, который задолжал им деньги, а именно 20 миллионов. о Куглов, который за время «своего отсутствия», стал кандидатом Коломбани.", LocalDate.parse("1900-03-25", DateTimeFormatter.ISO_DATE), 200);
+        Film film = new Film(null, "Film name", "Пятеро друзей ( комик-группа «Шарло»), приезжают в город Бризуль. Здесь они хотят разыскать господина Огюста Куглова, который задолжал им деньги, а именно 20 миллионов. о Куглов, который за время «своего отсутствия», стал кандидатом Коломбани.", LocalDate.parse("1900-03-25", DateTimeFormatter.ISO_DATE), 200, 1L);
 
         Assertions.assertEquals(1, validator.validate(film).size());
     }
 
     @Test
     void validateFailReleaseDate() {
-        Film film = new Film(null, "Name", "Description", LocalDate.parse("1890-03-25", DateTimeFormatter.ISO_DATE), 200);
+        Film film = new Film(null, "Name", "Description", LocalDate.parse("1890-03-25", DateTimeFormatter.ISO_DATE), 200, 1L);
 
         Assertions.assertEquals(1, validator.validate(film).size());
     }
 
     @Test
     void validateFailDuration() {
-        Film film = new Film(null, "Name", "Description", LocalDate.parse("1900-03-25", DateTimeFormatter.ISO_DATE), -200);
+        Film film = new Film(null, "Name", "Description", LocalDate.parse("1900-03-25", DateTimeFormatter.ISO_DATE), -200, 1L);
 
         Assertions.assertEquals(1, validator.validate(film).size());
     }
 
     @Test
     void update() {
-        Film film = new Film(null, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
+        Film film = new Film(null, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
 
         Assertions.assertEquals(Set.of(), validator.validate(film));
         Film createdFilm = controller.create(film);
 
-        Assertions.assertEquals(1, createdFilm.getId());
+        Assertions.assertEquals(1, createdFilm.getFilmId());
         assertEqualsFilms(film, createdFilm);
 
-        Film updateFilm = new Film(1L, "Film Updated", "New film update decription", LocalDate.parse("1989-04-17", DateTimeFormatter.ISO_DATE), 190);
+        Film updateFilm = new Film(1L, "Film Updated", "New film update decription", LocalDate.parse("1989-04-17", DateTimeFormatter.ISO_DATE), 190, 1L);
         Assertions.assertEquals(Set.of(), validator.validate(film));
 
         AtomicReference<Film> updatedFilm = new AtomicReference<>();
@@ -87,15 +87,15 @@ public class FilmControllerTest {
 
     @Test
     void updateUnknown() {
-        Film film = new Film(null, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100);
+        Film film = new Film(null, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
 
         Assertions.assertEquals(Set.of(), validator.validate(film));
         Film createdFilm = controller.create(film);
 
-        Assertions.assertEquals(1, createdFilm.getId());
+        Assertions.assertEquals(1, createdFilm.getFilmId());
         assertEqualsFilms(film, createdFilm);
 
-        Film updateFilm = new Film(9999L, "Film Updated", "New film update decription", LocalDate.parse("1989-04-17", DateTimeFormatter.ISO_DATE), 190);
+        Film updateFilm = new Film(9999L, "Film Updated", "New film update decription", LocalDate.parse("1989-04-17", DateTimeFormatter.ISO_DATE), 190, 1L);
         Assertions.assertEquals(Set.of(), validator.validate(film));
 
         Assertions.assertThrows(EntityIsNotFoundException.class, () -> controller.createOrUpdate(updateFilm));

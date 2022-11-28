@@ -86,14 +86,18 @@ class InMemoryUserFriendStorageTest {
         storage.createByUserIds(user1, user2);
 
         storage.createByUserIds(user1, user3);
+        storage.createByUserIds(user3, user1);
         storage.createByUserIds(user1, user4);
 
         storage.createByUserIds(user2, user5);
         storage.createByUserIds(user2, user6);
+        storage.createByUserIds(user6, user2);
 
         storage.createByUserIds(user3, user2);
+        storage.createByUserIds(user2, user3);
 
         storage.createByUserIds(user6, user1);
+        storage.createByUserIds(user1, user6);
 
         Assertions.assertEquals(List.of(3L, 6L), storage.getUserIdsInCommon(user1, user2));
     }

@@ -2,12 +2,12 @@ package ru.yandex.practicum.filmorate.util;
 
 import java.util.*;
 
-public class BiDirectedGraph<T, U> {
+public class Graph<T, U> {
     private final Set<T> vertexes;
 
     private final Map<T, Map<T, U>> edges;
 
-    public BiDirectedGraph() {
+    public Graph() {
         edges = new HashMap<>();
         vertexes = new HashSet<>();
     }
@@ -33,7 +33,6 @@ public class BiDirectedGraph<T, U> {
         }
 
         edges.get(vertexA).put(vertexB, edge);
-        edges.get(vertexB).put(vertexA, edge);
     }
 
     public void removeEdge(T vertexA, T vertexB) {
@@ -42,7 +41,6 @@ public class BiDirectedGraph<T, U> {
         }
 
         edges.get(vertexA).remove(vertexB);
-        edges.get(vertexB).remove(vertexA);
     }
 
     public U getEdge(T vertexA, T vertexB) {
@@ -58,22 +56,14 @@ public class BiDirectedGraph<T, U> {
     }
 
     public List<U> getEdges() {
-        List<T> listOfVertexes = new ArrayList<>(vertexes);
-        List<U> listOfAllEdges = new LinkedList<>();
-
-        for (int i = 0; i < listOfVertexes.size(); i++) {
-            for (int j = i + 1; j < listOfVertexes.size(); j++) {
-                T vertexI = listOfVertexes.get(i);
-                T vertexJ = listOfVertexes.get(j);
-                U edge = edges.get(vertexI).get(vertexJ);
-
-                if (edge != null) {
-                    listOfAllEdges.add(edge);
-                }
-            }
-        }
-
-        return listOfAllEdges;
+        return (List<U>) edges
+                .values()
+                .stream()
+                .map(Map::values)
+                .reduce(new LinkedList<>(), (result, item) -> {
+                    result.addAll(item);
+                    return result;
+                });
     }
 
     public Map<T, U> getEdgesOfVertex(T vertex) {

@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 public class InMemoryFilmLikeStorage implements FilmLikeStorage {
     private final Map<Long, Map<Long, FilmLike>> storage = new HashMap<>();
 
-    private long nextId = 1L;
-
     @Override
     public List<FilmLike> getAll() {
         return new LinkedList<>(storage
@@ -33,7 +31,7 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
 
     @Override
     public FilmLike createWithFilmIdAndUserId(Film film, User user) throws EntityAlreadyExistsException {
-        FilmLike filmLikeEntity = new FilmLike(nextId++, film.getId(), user.getId());
+        FilmLike filmLikeEntity = new FilmLike(film.getFilmId(), user.getUserId());
         create(filmLikeEntity);
 
         return filmLikeEntity;
@@ -54,12 +52,12 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
 
     @Override
     public void deleteByFilmIdAndUserId(Film film, User user) throws EntityIsNotFoundException {
-        Map<Long, FilmLike> filmLikesMapByUsers = storage.get(film.getId());
+        Map<Long, FilmLike> filmLikesMapByUsers = storage.get(film.getFilmId());
         if (filmLikesMapByUsers == null) {
             throw new EntityIsNotFoundException(FilmLike.class, 0L);
         }
 
-        FilmLike removedLike = filmLikesMapByUsers.remove(user.getId());
+        FilmLike removedLike = filmLikesMapByUsers.remove(user.getUserId());
 
         if (removedLike == null) {
             throw new EntityIsNotFoundException(FilmLike.class, 0L);
