@@ -19,12 +19,12 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
     }
 
     public List<Long> getUserIdsByUser(User user) {
-        return new LinkedList<>(storage.getEdgesOfVertex(user.getUserId()).keySet());
+        return new LinkedList<>(storage.getEdgesOfVertex(user.getId()).keySet());
     }
 
     @Override
     public UserFriend createByUserIds(User userA, User userB) throws EntityAlreadyExistsException, FriendOfHisOwnException {
-        UserFriend userFriendEntity = new UserFriend(userA.getUserId(), userB.getUserId());
+        UserFriend userFriendEntity = new UserFriend(userA.getId(), userB.getId());
         create(userFriendEntity);
 
         return userFriendEntity;
@@ -63,17 +63,17 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
 
     @Override
     public void deleteByUserIds(User userA, User userB) throws EntityIsNotFoundException {
-        if (storage.getEdge(userA.getUserId(), userB.getUserId()) == null) {
+        if (storage.getEdge(userA.getId(), userB.getId()) == null) {
             throw new EntityIsNotFoundException(UserFriend.class, 0L);
         }
 
-        storage.removeEdge(userA.getUserId(), userB.getUserId());
+        storage.removeEdge(userA.getId(), userB.getId());
     }
 
     @Override
     public List<Long> getUserIdsInCommon(User userA, User userB) {
-        Set<Long> friendsA = storage.getEdgesOfVertex(userA.getUserId()).keySet();
-        Set<Long> friendsB = storage.getEdgesOfVertex(userB.getUserId()).keySet();
+        Set<Long> friendsA = storage.getEdgesOfVertex(userA.getId()).keySet();
+        Set<Long> friendsB = storage.getEdgesOfVertex(userB.getId()).keySet();
         friendsA.retainAll(friendsB);
 
         return new LinkedList<>(friendsA);

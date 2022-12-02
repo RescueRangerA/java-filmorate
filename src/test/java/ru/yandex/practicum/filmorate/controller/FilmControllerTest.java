@@ -35,7 +35,7 @@ public class FilmControllerTest {
         Assertions.assertEquals(Set.of(), validator.validate(film));
         Film createdFilm = controller.create(film);
 
-        Assertions.assertEquals(1L, createdFilm.getFilmId());
+        Assertions.assertEquals(1L, createdFilm.getId());
         assertEqualsFilms(film, createdFilm);
     }
 
@@ -74,7 +74,7 @@ public class FilmControllerTest {
         Assertions.assertEquals(Set.of(), validator.validate(film));
         Film createdFilm = controller.create(film);
 
-        Assertions.assertEquals(1, createdFilm.getFilmId());
+        Assertions.assertEquals(1, createdFilm.getId());
         assertEqualsFilms(film, createdFilm);
 
         Film updateFilm = new Film(1L, "Film Updated", "New film update decription", LocalDate.parse("1989-04-17", DateTimeFormatter.ISO_DATE), 190, 1L);
@@ -92,7 +92,7 @@ public class FilmControllerTest {
         Assertions.assertEquals(Set.of(), validator.validate(film));
         Film createdFilm = controller.create(film);
 
-        Assertions.assertEquals(1, createdFilm.getFilmId());
+        Assertions.assertEquals(1, createdFilm.getId());
         assertEqualsFilms(film, createdFilm);
 
         Film updateFilm = new Film(9999L, "Film Updated", "New film update decription", LocalDate.parse("1989-04-17", DateTimeFormatter.ISO_DATE), 190, 1L);

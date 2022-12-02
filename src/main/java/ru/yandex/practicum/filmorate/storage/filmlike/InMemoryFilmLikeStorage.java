@@ -31,7 +31,7 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
 
     @Override
     public FilmLike createWithFilmIdAndUserId(Film film, User user) throws EntityAlreadyExistsException {
-        FilmLike filmLikeEntity = new FilmLike(film.getFilmId(), user.getUserId());
+        FilmLike filmLikeEntity = new FilmLike(film.getId(), user.getId());
         create(filmLikeEntity);
 
         return filmLikeEntity;
@@ -52,12 +52,12 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
 
     @Override
     public void deleteByFilmIdAndUserId(Film film, User user) throws EntityIsNotFoundException {
-        Map<Long, FilmLike> filmLikesMapByUsers = storage.get(film.getFilmId());
+        Map<Long, FilmLike> filmLikesMapByUsers = storage.get(film.getId());
         if (filmLikesMapByUsers == null) {
             throw new EntityIsNotFoundException(FilmLike.class, 0L);
         }
 
-        FilmLike removedLike = filmLikesMapByUsers.remove(user.getUserId());
+        FilmLike removedLike = filmLikesMapByUsers.remove(user.getId());
 
         if (removedLike == null) {
             throw new EntityIsNotFoundException(FilmLike.class, 0L);

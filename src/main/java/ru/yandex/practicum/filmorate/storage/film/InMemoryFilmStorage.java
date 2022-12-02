@@ -40,19 +40,19 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film create(Film filmEntity) {
-        filmEntity.setFilmId(nextId++);
-        storage.put(filmEntity.getFilmId(), filmEntity);
+        filmEntity.setId(nextId++);
+        storage.put(filmEntity.getId(), filmEntity);
 
         return filmEntity;
     }
 
     @Override
     public Film update(Film filmEntity) throws EntityIsNotFoundException {
-        if (!storage.containsKey(filmEntity.getFilmId())) {
-            throw new EntityIsNotFoundException(Film.class, filmEntity.getFilmId());
+        if (!storage.containsKey(filmEntity.getId())) {
+            throw new EntityIsNotFoundException(Film.class, filmEntity.getId());
         }
 
-        storage.put(filmEntity.getFilmId(), filmEntity);
+        storage.put(filmEntity.getId(), filmEntity);
 
         return filmEntity;
     }
