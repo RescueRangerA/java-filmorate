@@ -3,8 +3,6 @@ package ru.yandex.practicum.filmorate.storage.userfriend;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.UserFriend;
-import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
-import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.util.Graph;
 
 import java.util.*;
@@ -14,64 +12,55 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
     private final Graph<Long, UserFriend> storage = new Graph<>();
 
     @Override
-    public List<UserFriend> getAll() {
+    public List<UserFriend> findAll() {
         return storage.getEdges();
     }
 
-    public List<Long> getUserIdsByUser(User user) {
+    @Override
+    public Iterable<Long> findFriendsOfUser(User user) {
         return new LinkedList<>(storage.getEdgesOfVertex(user.getId()).keySet());
     }
 
     @Override
-    public UserFriend createByUserIds(User userA, User userB) throws EntityAlreadyExistsException, FriendOfHisOwnException {
-        UserFriend userFriendEntity = new UserFriend(userA.getId(), userB.getId());
-        create(userFriendEntity);
+    public UserFriend save(UserFriend entity) throws FriendOfHisOwnException {
+        Long fromUserId = entity.getFromUser().getId();
+        Long toUserId = entity.getToUser().getId();
 
-        return userFriendEntity;
-    }
-
-    public UserFriend create(UserFriend userFriendEntity) throws EntityAlreadyExistsException, FriendOfHisOwnException {
-        Long userA = userFriendEntity.getFromUserId();
-        Long userB = userFriendEntity.getToUserId();
-
-        if (Objects.equals(userA, userB)) {
-            throw new FriendOfHisOwnException(userFriendEntity);
+        if (Objects.equals(fromUserId, toUserId)) {
+            throw new FriendOfHisOwnException(entity);
         }
 
-        storage.addVertex(userA);
-        storage.addVertex(userB);
+        storage.addVertex(fromUserId);
+        storage.addVertex(toUserId);
 
-        if (storage.getEdge(userA, userB) != null) {
-            throw new EntityAlreadyExistsException(userFriendEntity);
+        UserFriend userFriend = storage.getEdge(fromUserId, toUserId);
+        if ( userFriend != null ) {
+            return userFriend;
         }
 
-        UserFriend maybeExistingUserFriendEntity = storage.getEdge(userB, userA);
+        UserFriend maybeExistingUserFriendEntity = storage.getEdge(toUserId, fromUserId);
 
         if (maybeExistingUserFriendEntity != null) {
-            userFriendEntity.setStatus(UserFriend.Status.CONFIRMED);
+            entity.setStatus(UserFriend.Status.CONFIRMED);
             maybeExistingUserFriendEntity.setStatus(UserFriend.Status.CONFIRMED);
 
-            storage.addEdge(userA, userB, userFriendEntity);
-            storage.addEdge(userB, userA, maybeExistingUserFriendEntity);
+            storage.addEdge(fromUserId, toUserId, entity);
+            storage.addEdge(toUserId, fromUserId, maybeExistingUserFriendEntity);
         } else {
-            userFriendEntity.setStatus(UserFriend.Status.PENDING);
-            storage.addEdge(userA, userB, userFriendEntity);
+            entity.setStatus(UserFriend.Status.PENDING);
+            storage.addEdge(fromUserId, toUserId, entity);
         }
 
-        return userFriendEntity;
+        return entity;
     }
 
     @Override
-    public void deleteByUserIds(User userA, User userB) throws EntityIsNotFoundException {
-        if (storage.getEdge(userA.getId(), userB.getId()) == null) {
-            throw new EntityIsNotFoundException(UserFriend.class, 0L);
-        }
-
-        storage.removeEdge(userA.getId(), userB.getId());
+    public void delete(UserFriend entity) {
+        storage.removeEdge(entity.getFromUser().getId(), entity.getToUser().getId());
     }
 
     @Override
-    public List<Long> getUserIdsInCommon(User userA, User userB) {
+    public Iterable<Long> findFriendsInCommonOf2Users(User userA, User userB) {
         Set<Long> friendsA = storage.getEdgesOfVertex(userA.getId()).keySet();
         Set<Long> friendsB = storage.getEdgesOfVertex(userB.getId()).keySet();
         friendsA.retainAll(friendsB);

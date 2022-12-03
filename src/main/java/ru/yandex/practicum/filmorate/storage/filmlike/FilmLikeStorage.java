@@ -2,18 +2,13 @@ package ru.yandex.practicum.filmorate.storage.filmlike;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmLike;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
-import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
-
-import java.util.List;
 
 public interface FilmLikeStorage {
-    List<FilmLike> getAll();
+    Iterable<FilmLike> findAll();
 
-    FilmLike createWithFilmIdAndUserId(Film film, User user) throws EntityAlreadyExistsException;
+    FilmLike save(FilmLike entity);
 
-    void deleteByFilmIdAndUserId(Film film, User user) throws EntityIsNotFoundException;
+    void delete(FilmLike entity);
 
-    List<Long> getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit);
+    Iterable<Film> getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit);
 }

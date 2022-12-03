@@ -1,14 +1,13 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -17,42 +16,51 @@ public class InMemoryUserStorage implements UserStorage {
     private long nextId = 1L;
 
     @Override
-    public List<User> getAll() {
+    public List<User> findAll() {
         return List.copyOf(storage.values());
     }
 
     @Override
-    public User create(User userEntity) {
-        userEntity.setId(nextId++);
-        storage.put(userEntity.getId(), userEntity);
+    public User save(User entity) {
+        Assert.notNull(entity, "Entity must not be null.");
 
-        return userEntity;
-    }
+        if (entity.getId() == null || entity.getId() == 0L) {
+            entity.setId(nextId++);
+            storage.put(entity.getId(), entity);
+        } else {
+            if (!storage.containsKey(entity.getId())) {
+                throw new EntityIsNotFoundException(User.class, entity.getId());
+            }
 
-    @Override
-    public User update(User userEntity) throws EntityIsNotFoundException {
-        if (!storage.containsKey(userEntity.getId())) {
-            throw new EntityIsNotFoundException(User.class, userEntity.getId());
+            storage.put(entity.getId(), entity);
         }
 
-        storage.put(userEntity.getId(), userEntity);
-
-        return userEntity;
+        return entity;
     }
 
     @Override
-    public User getById(Long userId) throws EntityIsNotFoundException {
-        User user = storage.get(userId);
+    public Optional<User> findById(Long aLong) {
+        User user = storage.get(aLong);
 
-        if (user == null) {
-            throw new EntityIsNotFoundException(User.class, userId);
-        }
-
-        return user;
+        return user != null ? Optional.of(user) : Optional.empty();
     }
 
     @Override
-    public List<User> getMany(List<Long> userIds) {
-        return userIds.stream().map(storage::get).filter(Objects::nonNull).collect(Collectors.toList());
+    public Iterable<User> findAllById(Iterable<Long> longs) {
+        return StreamSupport
+                .stream(longs.spliterator(), false)
+                .map(storage::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteById(Long aLong) {
+        storage.remove(aLong);
+    }
+
+    @Override
+    public void delete(User entity) {
+        storage.remove(entity.getId());
     }
 }

@@ -13,17 +13,17 @@ public class UserFriend {
         PENDING, CONFIRMED
     }
 
-    public UserFriend(Long fromUserId, Long toUserId) {
-        this.fromUserId = fromUserId;
-        this.toUserId = toUserId;
+    public UserFriend(User fromUser, User toUser) {
+        this.fromUser = fromUser;
+        this.toUser = toUser;
         this.status = Status.PENDING;
     }
 
     @Positive
-    private Long fromUserId;
+    private User fromUser;
 
     @Positive
-    private Long toUserId;
+    private User toUser;
 
     @Positive
     private Status status;

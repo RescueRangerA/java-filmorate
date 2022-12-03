@@ -1,11 +1,12 @@
 package ru.yandex.practicum.filmorate.storage.filmlike;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmLike;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,8 +15,15 @@ import java.util.stream.Collectors;
 public class InMemoryFilmLikeStorage implements FilmLikeStorage {
     private final Map<Long, Map<Long, FilmLike>> storage = new HashMap<>();
 
+    private final FilmStorage filmStorage;
+
+    @Autowired
+    public InMemoryFilmLikeStorage(FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
+    }
+
     @Override
-    public List<FilmLike> getAll() {
+    public List<FilmLike> findAll() {
         return new LinkedList<>(storage
                 .values().stream()
                 .map(Map::values)
@@ -30,32 +38,29 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
     }
 
     @Override
-    public FilmLike createWithFilmIdAndUserId(Film film, User user) throws EntityAlreadyExistsException {
-        FilmLike filmLikeEntity = new FilmLike(film.getId(), user.getId());
-        create(filmLikeEntity);
+    public FilmLike save(FilmLike entity) {
+        Map<Long, FilmLike> filmLikesMapByUsers = storage.getOrDefault(entity.getFilm().getId(), new HashMap<>());
 
-        return filmLikeEntity;
-    }
-
-    public FilmLike create(FilmLike filmLikeEntity) throws EntityAlreadyExistsException {
-        Map<Long, FilmLike> filmLikesMapByUsers = storage.getOrDefault(filmLikeEntity.getFilmId(), new HashMap<>());
-
-        if (filmLikesMapByUsers.containsKey(filmLikeEntity.getUsedId())) {
-            throw new EntityAlreadyExistsException(filmLikeEntity);
+        if (filmLikesMapByUsers.containsKey(entity.getUser().getId())) {
+            return entity;
         }
 
-        filmLikesMapByUsers.put(filmLikeEntity.getUsedId(), filmLikeEntity);
-        storage.put(filmLikeEntity.getFilmId(), filmLikesMapByUsers);
+        filmLikesMapByUsers.put(entity.getUser().getId(), entity);
+        storage.put(entity.getFilm().getId(), filmLikesMapByUsers);
 
-        return filmLikeEntity;
+        return entity;
     }
 
     @Override
-    public void deleteByFilmIdAndUserId(Film film, User user) throws EntityIsNotFoundException {
+    public void delete(FilmLike entity) {
+        Film film = entity.getFilm();
+
         Map<Long, FilmLike> filmLikesMapByUsers = storage.get(film.getId());
         if (filmLikesMapByUsers == null) {
             throw new EntityIsNotFoundException(FilmLike.class, 0L);
         }
+
+        User user = entity.getUser();
 
         FilmLike removedLike = filmLikesMapByUsers.remove(user.getId());
 
@@ -65,16 +70,32 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
     }
 
     @Override
-    public List<Long> getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit) {
+    public Iterable<Film> getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit) {
         LinkedHashMap<Long, Integer> countSummary = new LinkedHashMap<>();
         storage.forEach((key, value) -> countSummary.put(key, value.size()));
 
-        return countSummary
-                .entrySet()
-                .stream()
-                .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
-                .limit(limit)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+        List<Film> popularFilms = (List<Film>) filmStorage.findAllById(
+                countSummary
+                        .entrySet()
+                        .stream()
+                        .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+                        .limit(limit)
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList())
+        );
+
+        if (popularFilms.size() < limit) {
+            for (Film film : filmStorage.findFirstN(limit)) {
+                if (popularFilms.size() == limit) {
+                    break;
+                }
+
+                if (!popularFilms.contains(film)) {
+                    popularFilms.add(film);
+                }
+            }
+        }
+
+        return popularFilms;
     }
 }

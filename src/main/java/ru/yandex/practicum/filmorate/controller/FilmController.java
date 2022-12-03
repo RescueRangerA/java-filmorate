@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmLike;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
-import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -25,31 +23,26 @@ public class FilmController {
 
     @GetMapping
     public List<Film> findAll() {
-        return filmService.getAll();
+        return filmService.findAll();
     }
 
-    @PostMapping
-    public Film create(@Valid @RequestBody Film film) {
-        return filmService.create(film);
-    }
-
-    @PutMapping
-    public Film createOrUpdate(@Valid @RequestBody Film film) throws EntityIsNotFoundException {
-        return filmService.update(film);
+    @RequestMapping(method = {RequestMethod.PUT, RequestMethod.POST})
+    public Film createOrUpdate(@Valid @RequestBody Film film) {
+        return filmService.save(film);
     }
 
     @GetMapping("/{filmId}")
-    public Film getFilm(@PathVariable Long filmId) throws EntityIsNotFoundException {
+    public Film getFilm(@PathVariable Long filmId) {
         return filmService.getById(filmId);
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    public FilmLike addLike(@PathVariable Long filmId, @PathVariable Long userId) throws EntityAlreadyExistsException, EntityIsNotFoundException {
+    public FilmLike addLike(@PathVariable Long filmId, @PathVariable Long userId) {
         return filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public void removeLike(@PathVariable Long filmId, @PathVariable Long userId) throws EntityIsNotFoundException {
+    public void removeLike(@PathVariable Long filmId, @PathVariable Long userId) {
         filmService.removeLike(filmId, userId);
     }
 

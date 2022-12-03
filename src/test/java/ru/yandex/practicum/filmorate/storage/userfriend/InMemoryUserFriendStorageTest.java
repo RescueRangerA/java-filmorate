@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
-import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
+import ru.yandex.practicum.filmorate.model.UserFriend;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -21,26 +20,12 @@ class InMemoryUserFriendStorageTest {
     }
 
     @Test
-    void createByUserIds() throws EntityAlreadyExistsException, FriendOfHisOwnException {
+    void createByUserIds() throws FriendOfHisOwnException {
         User userA = new User(1L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
         User userB = new User(2L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
 
-        storage.createByUserIds(userA, userB);
-        Assertions.assertEquals(1, storage.getAll().size());
-    }
-
-    @Test
-    void createByUserIdsDuplicate() throws EntityAlreadyExistsException, FriendOfHisOwnException {
-        User userA = new User(1L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
-        User userB = new User(2L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
-
-        storage.createByUserIds(userA, userB);
-        Assertions.assertEquals(1, storage.getAll().size());
-
-        Assertions.assertThrows(
-                EntityAlreadyExistsException.class,
-                () -> storage.createByUserIds(userA, userB)
-        );
+        storage.save(new UserFriend(userA, userB));
+        Assertions.assertEquals(1, storage.findAll().size());
     }
 
     @Test
@@ -49,33 +34,22 @@ class InMemoryUserFriendStorageTest {
 
         Assertions.assertThrows(
                 FriendOfHisOwnException.class,
-                () -> storage.createByUserIds(userA, userA)
+                () -> storage.save(new UserFriend(userA, userA))
         );
     }
 
     @Test
-    void deleteByUserIds() throws EntityIsNotFoundException, EntityAlreadyExistsException, FriendOfHisOwnException {
+    void deleteByUserIds() throws FriendOfHisOwnException {
         User userA = new User(1L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
         User userB = new User(2L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
 
-        storage.createByUserIds(userA, userB);
-        storage.deleteByUserIds(userA, userB);
-        Assertions.assertEquals(0, storage.getAll().size());
+        storage.save(new UserFriend(userA, userB));
+        storage.delete(new UserFriend(userA, userB));
+        Assertions.assertEquals(0, storage.findAll().size());
     }
 
     @Test
-    void deleteNonExistingByUserIds() {
-        User userA = new User(1L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
-        User userB = new User(2L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
-
-        Assertions.assertThrows(
-                EntityIsNotFoundException.class,
-                () -> storage.deleteByUserIds(userA, userB)
-        );
-    }
-
-    @Test
-    void getUserIdsInCommon() throws EntityAlreadyExistsException, FriendOfHisOwnException {
+    void getUserIdsInCommon() throws FriendOfHisOwnException {
         User user1 = new User(1L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
         User user2 = new User(2L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
         User user3 = new User(3L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
@@ -83,22 +57,22 @@ class InMemoryUserFriendStorageTest {
         User user5 = new User(5L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
         User user6 = new User(6L, "mail@mail.ru", "dolore", "Nick Name", LocalDate.parse("1946-08-20", DateTimeFormatter.ISO_DATE));
 
-        storage.createByUserIds(user1, user2);
+        storage.save(new UserFriend(user1, user2));
 
-        storage.createByUserIds(user1, user3);
-        storage.createByUserIds(user3, user1);
-        storage.createByUserIds(user1, user4);
+        storage.save(new UserFriend(user1, user3));
+        storage.save(new UserFriend(user3, user1));
+        storage.save(new UserFriend(user1, user4));
 
-        storage.createByUserIds(user2, user5);
-        storage.createByUserIds(user2, user6);
-        storage.createByUserIds(user6, user2);
+        storage.save(new UserFriend(user2, user5));
+        storage.save(new UserFriend(user2, user6));
+        storage.save(new UserFriend(user6, user2));
 
-        storage.createByUserIds(user3, user2);
-        storage.createByUserIds(user2, user3);
+        storage.save(new UserFriend(user3, user2));
+        storage.save(new UserFriend(user2, user3));
 
-        storage.createByUserIds(user6, user1);
-        storage.createByUserIds(user1, user6);
+        storage.save(new UserFriend(user6, user1));
+        storage.save(new UserFriend(user1, user6));
 
-        Assertions.assertEquals(List.of(3L, 6L), storage.getUserIdsInCommon(user1, user2));
+        Assertions.assertEquals(List.of(3L, 6L), storage.findFriendsInCommonOf2Users(user1, user2));
     }
 }

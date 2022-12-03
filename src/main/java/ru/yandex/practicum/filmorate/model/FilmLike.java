@@ -10,8 +10,8 @@ import javax.validation.constraints.Positive;
 @NoArgsConstructor
 public class FilmLike {
     @Positive
-    private Long filmId;
+    private Film film;
 
     @Positive
-    private Long usedId;
+    private User user;
 }

@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -14,46 +16,55 @@ public class InMemoryFilmStorage implements FilmStorage {
     private long nextId = 1L;
 
     @Override
-    public List<Film> getAll() {
+    public Iterable<Film> findAll() {
         return List.copyOf(storage.values());
     }
 
-    public List<Film> getFirstN(Integer limit) {
+    public Iterable<Film> findFirstN(Integer limit) {
         return storage.values().stream().limit(limit).collect(Collectors.toList());
     }
 
     @Override
-    public Film get(Long filmId) throws EntityIsNotFoundException {
-        Film film = storage.get(filmId);
+    public Film save(Film entity) {
+        Assert.notNull(entity, "Entity must not be null.");
 
-        if (film == null) {
-            throw new EntityIsNotFoundException(Film.class, filmId);
+        if (entity.getId() == null || entity.getId() == 0L) {
+            entity.setId(nextId++);
+            storage.put(entity.getId(), entity);
+        } else {
+            if (!storage.containsKey(entity.getId())) {
+                throw new EntityIsNotFoundException(Film.class, entity.getId());
+            }
+
+            storage.put(entity.getId(), entity);
         }
 
-        return film;
+        return entity;
     }
 
     @Override
-    public List<Film> getMany(List<Long> filmIds) {
-        return filmIds.stream().map(storage::get).filter(Objects::nonNull).collect(Collectors.toList());
+    public Optional<Film> findById(Long aLong) {
+        Film user = storage.get(aLong);
+
+        return user != null ? Optional.of(user) : Optional.empty();
     }
 
     @Override
-    public Film create(Film filmEntity) {
-        filmEntity.setId(nextId++);
-        storage.put(filmEntity.getId(), filmEntity);
-
-        return filmEntity;
+    public Iterable<Film> findAllById(Iterable<Long> longs) {
+        return StreamSupport
+                .stream(longs.spliterator(), false)
+                .map(storage::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Film update(Film filmEntity) throws EntityIsNotFoundException {
-        if (!storage.containsKey(filmEntity.getId())) {
-            throw new EntityIsNotFoundException(Film.class, filmEntity.getId());
-        }
+    public void deleteById(Long aLong) {
+        storage.remove(aLong);
+    }
 
-        storage.put(filmEntity.getId(), filmEntity);
-
-        return filmEntity;
+    @Override
+    public void delete(Film entity) {
+        storage.remove(entity.getId());
     }
 }

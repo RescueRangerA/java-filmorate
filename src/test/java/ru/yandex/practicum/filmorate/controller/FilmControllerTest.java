@@ -25,7 +25,7 @@ public class FilmControllerTest {
 
     @BeforeEach
     void beforeEach() {
-        controller = new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryFilmLikeStorage(), new InMemoryUserStorage()));
+        controller = new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryFilmLikeStorage(new InMemoryFilmStorage()), new InMemoryUserStorage()));
     }
 
     @Test
@@ -33,7 +33,7 @@ public class FilmControllerTest {
         Film film = new Film(null, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
 
         Assertions.assertEquals(Set.of(), validator.validate(film));
-        Film createdFilm = controller.create(film);
+        Film createdFilm = controller.createOrUpdate(film);
 
         Assertions.assertEquals(1L, createdFilm.getId());
         assertEqualsFilms(film, createdFilm);
@@ -72,7 +72,7 @@ public class FilmControllerTest {
         Film film = new Film(null, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
 
         Assertions.assertEquals(Set.of(), validator.validate(film));
-        Film createdFilm = controller.create(film);
+        Film createdFilm = controller.createOrUpdate(film);
 
         Assertions.assertEquals(1, createdFilm.getId());
         assertEqualsFilms(film, createdFilm);
@@ -90,7 +90,7 @@ public class FilmControllerTest {
         Film film = new Film(null, "nisi eiusmod", "adipisicing", LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE), 100, 1L);
 
         Assertions.assertEquals(Set.of(), validator.validate(film));
-        Film createdFilm = controller.create(film);
+        Film createdFilm = controller.createOrUpdate(film);
 
         Assertions.assertEquals(1, createdFilm.getId());
         assertEqualsFilms(film, createdFilm);

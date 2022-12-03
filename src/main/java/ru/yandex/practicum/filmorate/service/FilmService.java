@@ -4,13 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmLike;
-import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.filmlike.FilmLikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FilmService {
@@ -27,47 +28,49 @@ public class FilmService {
         this.userStorage = userStorage;
     }
 
-    public List<Film> getAll() {
-        return filmStorage.getAll();
+    public List<Film> findAll() {
+        return (List<Film>) filmStorage.findAll();
     }
 
-    public Film create(Film film) {
-        return filmStorage.create(film);
+    public Film save(Film film) {
+        return filmStorage.save(film);
     }
 
-    public Film update(Film film) throws EntityIsNotFoundException {
-        return filmStorage.update(film);
+    public Film getById(Long filmId) {
+        return filmStorage.findById(filmId).orElseThrow(() -> new EntityIsNotFoundException(Film.class, 0L));
     }
 
-    public Film getById(Long filmId) throws EntityIsNotFoundException {
-        return filmStorage.get(filmId);
+    public FilmLike addLike(Long filmId, Long userId) {
+        Optional<Film> film = filmStorage.findById(filmId);
+        Optional<User> user = userStorage.findById(userId);
+
+        if ( film.isEmpty() ) {
+            throw new EntityIsNotFoundException(Film.class, 0L);
+        }
+
+        if ( user.isEmpty() ) {
+            throw new EntityIsNotFoundException(User.class, 0L);
+        }
+
+        return filmLikeStorage.save(new FilmLike(film.get(), user.get()));
     }
 
-    public FilmLike addLike(Long filmId, Long userId) throws EntityAlreadyExistsException, EntityIsNotFoundException {
-        return filmLikeStorage.createWithFilmIdAndUserId(filmStorage.get(filmId), userStorage.getById(userId));
-    }
+    public void removeLike(Long filmId, Long userId) {
+        Optional<Film> film = filmStorage.findById(filmId);
+        Optional<User> user = userStorage.findById(userId);
 
-    public void removeLike(Long filmId, Long userId) throws EntityIsNotFoundException {
-        filmLikeStorage.deleteByFilmIdAndUserId(filmStorage.get(filmId), userStorage.getById(userId));
+        if ( film.isEmpty() ) {
+            throw new EntityIsNotFoundException(Film.class, 0L);
+        }
+
+        if ( user.isEmpty() ) {
+            throw new EntityIsNotFoundException(User.class, 0L);
+        }
+
+        filmLikeStorage.delete(new FilmLike(film.get(), user.get()));
     }
 
     public List<Film> getPopularFilms(Integer limit) {
-        List<Film> popularFilms = filmStorage.getMany(
-                filmLikeStorage.getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(limit)
-        );
-
-        if (popularFilms.size() < limit) {
-            for (Film film : filmStorage.getFirstN(limit)) {
-                if ( popularFilms.size() == limit ) {
-                    break;
-                }
-
-                if ( ! popularFilms.contains(film) ) {
-                    popularFilms.add(film);
-                }
-            }
-        }
-
-        return popularFilms;
+        return (List<Film>) filmLikeStorage.getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(limit);
     }
 }
