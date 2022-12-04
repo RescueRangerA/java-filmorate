@@ -1,2 +1,6 @@
-# java-filmorate
-Template repository for Filmorate project.
+# Filmorate
+
+
+## Entity Relational Diagram for this project
+
+![ERD](docs/entity-relational-diagram.svg)
