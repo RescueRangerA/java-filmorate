@@ -36,8 +36,8 @@ public class FilmLikeDbStorage implements FilmLikeStorage {
     public Iterable<FilmLike> findFilmLikesAll() {
         return jdbcTemplate.query(
                 "SELECT * FROM film_like " +
-                        "LEFT JOIN films ON films.id = film_like.film_id " +
-                        "LEFT JOIN users ON users.id = film_like.genre_id",
+                        "LEFT JOIN film ON film.id = film_like.film_id " +
+                        "LEFT JOIN \"user\" ON \"user\".id = film_like.genre_id",
                 new FilmLikeMapper()
         );
     }
@@ -78,10 +78,10 @@ public class FilmLikeDbStorage implements FilmLikeStorage {
         }
 
         return jdbcTemplate.query(
-                "SELECT films.*,film_mpa_rating.*, COUNT(film_like.film_id) as likes FROM films " +
-                        "LEFT JOIN film_like ON films.id = film_like.film_id " +
-                        "LEFT JOIN film_mpa_rating ON films.rating_id = film_mpa_rating.id " +
-                        "GROUP BY films.id " +
+                "SELECT film.*,film_mpa_rating.*, COUNT(film_like.film_id) as likes FROM film " +
+                        "LEFT JOIN film_like ON film.id = film_like.film_id " +
+                        "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                        "GROUP BY film.id " +
                         "ORDER BY likes DESC " +
                         "LIMIT ?",
                 new FilmDbStorage.FilmMapper(),

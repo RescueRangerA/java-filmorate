@@ -5,9 +5,9 @@ INSERT INTO film_mpa_rating (title, description) VALUES ('R', 'Лицам до 1
 INSERT INTO film_mpa_rating (title, description) VALUES ('NC-17', 'Лицам до 18 лет просмотр запрещён') ON CONFLICT DO NOTHING;
 
 
-INSERT INTO genres (title) VALUES ('Комедия') ON CONFLICT DO NOTHING;
-INSERT INTO genres (title) VALUES ('Драма') ON CONFLICT DO NOTHING;
-INSERT INTO genres (title) VALUES ('Мультфильм') ON CONFLICT DO NOTHING;
-INSERT INTO genres (title) VALUES ('Триллер') ON CONFLICT DO NOTHING;
-INSERT INTO genres (title) VALUES ('Документальный') ON CONFLICT DO NOTHING;
-INSERT INTO genres (title) VALUES ('Боевик') ON CONFLICT DO NOTHING;
+INSERT INTO genre (title) VALUES ('Комедия') ON CONFLICT DO NOTHING;
+INSERT INTO genre (title) VALUES ('Драма') ON CONFLICT DO NOTHING;
+INSERT INTO genre (title) VALUES ('Мультфильм') ON CONFLICT DO NOTHING;
+INSERT INTO genre (title) VALUES ('Триллер') ON CONFLICT DO NOTHING;
+INSERT INTO genre (title) VALUES ('Документальный') ON CONFLICT DO NOTHING;
+INSERT INTO genre (title) VALUES ('Боевик') ON CONFLICT DO NOTHING;

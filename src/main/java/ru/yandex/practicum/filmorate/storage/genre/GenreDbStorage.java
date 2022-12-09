@@ -20,8 +20,8 @@ public class GenreDbStorage implements GenreStorage {
         @Override
         public Genre mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new Genre(
-                    rs.getLong("genres.id"),
-                    rs.getString("genres.title")
+                    rs.getLong("genre.id"),
+                    rs.getString("genre.title")
             );
         }
     }
@@ -35,7 +35,7 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public Iterable<Genre> findAll() {
         return jdbcTemplate.query(
-                "SELECT * FROM genres",
+                "SELECT * FROM genre",
                 new GenreMapper()
         );
     }
@@ -46,7 +46,7 @@ public class GenreDbStorage implements GenreStorage {
 
         try {
             genre = jdbcTemplate.queryForObject(
-                    "SELECT * FROM genres WHERE genres.id = ?",
+                    "SELECT * FROM genre WHERE genre.id = ?",
                     new GenreMapper(),
                     aLong
             );
@@ -65,7 +65,7 @@ public class GenreDbStorage implements GenreStorage {
         String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
 
         return jdbcTemplate.query(
-                String.format("SELECT * FROM genres WHERE id IN (%s)", inSql),
+                String.format("SELECT * FROM genre WHERE id IN (%s)", inSql),
                 new GenreMapper(),
                 ids.toArray()
         );

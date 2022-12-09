@@ -38,8 +38,8 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     public Iterable<FilmGenre> findFilmGenreAll() {
         return jdbcTemplate.query(
                 "SELECT * FROM film_genre " +
-                        "LEFT JOIN films ON films.id = film_genre.film_id " +
-                        "LEFT JOIN genres ON genres.id = film_genre.genre_id",
+                        "LEFT JOIN film ON film.id = film_genre.film_id " +
+                        "LEFT JOIN genre ON genre.id = film_genre.genre_id",
                 new FilmGenreMapper()
         );
     }
@@ -47,9 +47,9 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     @Override
     public Iterable<FilmGenre> findAllByFilm(Film film) {
         List<Genre> genreList = jdbcTemplate.query(
-                "SELECT * FROM genres " +
-                        "LEFT JOIN film_genre ON genres.id = film_genre.genre_id " +
-                        "LEFT JOIN films ON films.id = film_genre.film_id " +
+                "SELECT * FROM genre " +
+                        "LEFT JOIN film_genre ON genre.id = film_genre.genre_id " +
+                        "LEFT JOIN film ON film.id = film_genre.film_id " +
                         "WHERE film_genre.film_id = ?",
                 new GenreDbStorage.GenreMapper(),
                 film.getId()

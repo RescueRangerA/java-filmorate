@@ -19,23 +19,23 @@ public class UserFriendDbStorage implements UserFriendStorage {
     public static class UserFriendMapper implements RowMapper<UserFriend> {
         @Override
         public UserFriend mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Date userFromBirthDateParam = rs.getDate("users_from.birthday");
+            Date userFromBirthDateParam = rs.getDate("user_from.birthday");
 
             User userFrom = new User(
-                    rs.getLong("users_from.id"),
-                    rs.getString("users_from.email"),
-                    rs.getString("users_from.login"),
-                    rs.getString("users_from.name"),
+                    rs.getLong("user_from.id"),
+                    rs.getString("user_from.email"),
+                    rs.getString("user_from.login"),
+                    rs.getString("user_from.name"),
                     userFromBirthDateParam != null ? userFromBirthDateParam.toLocalDate() : null
             );
 
-            Date userToBirthDateParam = rs.getDate("users_to.birthday");
+            Date userToBirthDateParam = rs.getDate("user_to.birthday");
 
             User userTo = new User(
-                    rs.getLong("users_to.id"),
-                    rs.getString("users_to.email"),
-                    rs.getString("users_to.login"),
-                    rs.getString("users_to.name"),
+                    rs.getLong("user_to.id"),
+                    rs.getString("user_to.email"),
+                    rs.getString("user_to.login"),
+                    rs.getString("user_to.name"),
                     userToBirthDateParam != null ? userToBirthDateParam.toLocalDate() : null
             );
 
@@ -53,8 +53,8 @@ public class UserFriendDbStorage implements UserFriendStorage {
     public Iterable<UserFriend> findAll() {
         return jdbcTemplate.query(
                 "SELECT * FROM user_friendship " +
-                        "LEFT JOIN users as users_from ON users_from.id = user_friendship.from_user_id " +
-                        "LEFT JOIN users as users_to ON users_to.id = user_friendship.to_user_id ",
+                        "LEFT JOIN \"user\" as user_from ON user_from.id = user_friendship.from_user_id " +
+                        "LEFT JOIN \"user\" as user_to ON user_to.id = user_friendship.to_user_id ",
                 new UserFriendMapper()
         );
     }
@@ -62,8 +62,8 @@ public class UserFriendDbStorage implements UserFriendStorage {
     @Override
     public Iterable<User> findFriendsOfUser(User user) {
         return jdbcTemplate.query(
-                "SELECT * FROM users " +
-                        "LEFT JOIN user_friendship as uf_to ON users.id = uf_to.to_user_id " +
+                "SELECT * FROM \"user\" " +
+                        "LEFT JOIN user_friendship as uf_to ON \"user\".id = uf_to.to_user_id " +
                         "WHERE (uf_to.from_user_id = ?)",
                 new UserDbStorage.UserMapper(),
                 user.getId()
@@ -108,11 +108,11 @@ public class UserFriendDbStorage implements UserFriendStorage {
     @Override
     public Iterable<User> findFriendsInCommonOf2Users(User userA, User userB) {
         return jdbcTemplate.query(
-                "SELECT users.* FROM users " +
-                        "LEFT JOIN user_friendship as uf_to ON users.id = uf_to.to_user_id " +
+                "SELECT \"user\".* FROM \"user\" " +
+                        "LEFT JOIN user_friendship as uf_to ON \"user\".id = uf_to.to_user_id " +
                         "WHERE uf_to.from_user_id IN (?,?) " +
-                        "GROUP BY users.id " +
-                        "HAVING COUNT(users.id) = 2",
+                        "GROUP BY \"user\".id " +
+                        "HAVING COUNT(\"user\".id) = 2",
                 new UserDbStorage.UserMapper(),
                 userA.getId(),
                 userB.getId()

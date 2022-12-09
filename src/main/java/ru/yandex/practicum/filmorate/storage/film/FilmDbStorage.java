@@ -21,14 +21,14 @@ public class FilmDbStorage implements FilmStorage {
     public static class FilmMapper implements RowMapper<Film> {
         @Override
         public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Date releaseDate = rs.getDate("films.release_date");
+            Date releaseDate = rs.getDate("film.release_date");
 
             return new Film(
-                    rs.getLong("films.id"),
-                    rs.getString("films.title"),
-                    rs.getString("films.description"),
+                    rs.getLong("film.id"),
+                    rs.getString("film.title"),
+                    rs.getString("film.description"),
                     releaseDate != null ? releaseDate.toLocalDate() : null,
-                    rs.getInt("films.duration"),
+                    rs.getInt("film.duration"),
                     (new MpaRatingDbStorage.MpaRatingMapper()).mapRow(rs, rowNum)
             );
         }
@@ -43,7 +43,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Iterable<Film> findAll() {
         return jdbcTemplate.query(
-                "SELECT * FROM films LEFT JOIN film_mpa_rating as rating ON films.rating_id = rating.id",
+                "SELECT * FROM film LEFT JOIN film_mpa_rating as rating ON film.rating_id = rating.id",
                 new FilmMapper()
         );
     }
@@ -55,7 +55,7 @@ public class FilmDbStorage implements FilmStorage {
         if (entity.getId() == null || entity.getId() == 0L) {
             GeneratedKeyHolder holder = new GeneratedKeyHolder();
             jdbcTemplate.update(con -> {
-                PreparedStatement statement = con.prepareStatement("INSERT INTO films (title, description, release_date, duration, rating_id) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement statement = con.prepareStatement("INSERT INTO film (title, description, release_date, duration, rating_id) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
                 statement.setString(1, entity.getName());
                 statement.setString(2, entity.getDescription());
                 statement.setDate(3, Date.valueOf(entity.getReleaseDate()));
@@ -80,7 +80,7 @@ public class FilmDbStorage implements FilmStorage {
             entity.setId(newId);
         } else {
             int rowsAffected = jdbcTemplate.update(
-                    "UPDATE films SET title = ?, description = ?, release_date = ?, duration = ?, rating_id = ? WHERE id = ?",
+                    "UPDATE film SET title = ?, description = ?, release_date = ?, duration = ?, rating_id = ? WHERE id = ?",
                     entity.getName(),
                     entity.getDescription(),
                     entity.getReleaseDate(),
@@ -103,7 +103,7 @@ public class FilmDbStorage implements FilmStorage {
 
         try {
             film = jdbcTemplate.queryForObject(
-                    "SELECT * FROM films LEFT JOIN film_mpa_rating as rating ON films.rating_id = rating.id WHERE films.id = ?",
+                    "SELECT * FROM film LEFT JOIN film_mpa_rating as rating ON film.rating_id = rating.id WHERE film.id = ?",
                     new FilmMapper(),
                     aLong
             );
@@ -122,7 +122,7 @@ public class FilmDbStorage implements FilmStorage {
         String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
 
         return jdbcTemplate.query(
-                String.format("SELECT * FROM films LEFT JOIN film_mpa_rating as rating ON films.rating_id = rating.id WHERE id IN (%s)", inSql),
+                String.format("SELECT * FROM film LEFT JOIN film_mpa_rating as rating ON film.rating_id = rating.id WHERE id IN (%s)", inSql),
                 new FilmMapper(),
                 ids.toArray()
         );
@@ -130,18 +130,18 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void deleteById(Long aLong) {
-        jdbcTemplate.update("DELETE FROM films WHERE id = ?", aLong);
+        jdbcTemplate.update("DELETE FROM film WHERE id = ?", aLong);
     }
 
     @Override
     public void delete(Film entity) {
-        jdbcTemplate.update("DELETE FROM films WHERE id = ?", entity.getId());
+        jdbcTemplate.update("DELETE FROM film WHERE id = ?", entity.getId());
     }
 
     @Override
     public Iterable<Film> findFirstN(Integer limit) {
         return jdbcTemplate.query(
-                "SELECT * FROM films LEFT JOIN film_mpa_rating ON films.rating_id = film_mpa_rating.id ORDER BY films.id LIMIT ?",
+                "SELECT * FROM film LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id ORDER BY film.id LIMIT ?",
                 new FilmMapper(),
                 limit
         );

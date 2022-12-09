@@ -20,13 +20,13 @@ public class UserDbStorage implements UserStorage {
     public static class UserMapper implements RowMapper<User> {
         @Override
         public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Date birthDateParam = rs.getDate("users.birthday");
+            Date birthDateParam = rs.getDate("user.birthday");
 
             return new User(
-                    rs.getLong("users.id"),
-                    rs.getString("users.email"),
-                    rs.getString("users.login"),
-                    rs.getString("users.name"),
+                    rs.getLong("user.id"),
+                    rs.getString("user.email"),
+                    rs.getString("user.login"),
+                    rs.getString("user.name"),
                     birthDateParam != null ? birthDateParam.toLocalDate() : null
             );
         }
@@ -47,7 +47,7 @@ public class UserDbStorage implements UserStorage {
         if (entity.getId() == null || entity.getId() == 0L) {
             GeneratedKeyHolder holder = new GeneratedKeyHolder();
             jdbcTemplate.update(con -> {
-                PreparedStatement statement = con.prepareStatement("INSERT INTO users (email, login, name, birthday) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement statement = con.prepareStatement("INSERT INTO \"user\" (email, login, name, birthday) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
                 statement.setString(1, entity.getEmail());
                 statement.setString(2, entity.getLogin());
                 statement.setString(3, entity.getName());
@@ -71,7 +71,7 @@ public class UserDbStorage implements UserStorage {
             entity.setId(newId);
         } else {
             int rowsAffected = jdbcTemplate.update(
-                    "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?",
+                    "UPDATE \"user\" SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?",
                     entity.getEmail(),
                     entity.getLogin(),
                     entity.getName(),
@@ -92,7 +92,7 @@ public class UserDbStorage implements UserStorage {
         User user = null;
 
         try {
-            user = jdbcTemplate.queryForObject("SELECT * FROM users WHERE id = ?", new UserMapper(), aLong);
+            user = jdbcTemplate.queryForObject("SELECT * FROM \"user\" WHERE id = ?", new UserMapper(), aLong);
         } catch (EmptyResultDataAccessException ignored) {
 
         }
@@ -102,7 +102,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Iterable<User> findAll() {
-        return jdbcTemplate.query("SELECT * FROM users", new UserMapper());
+        return jdbcTemplate.query("SELECT * FROM \"user\"", new UserMapper());
     }
 
     @Override
@@ -113,7 +113,7 @@ public class UserDbStorage implements UserStorage {
         String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
 
         return jdbcTemplate.query(
-                String.format("SELECT * FROM users WHERE id IN (%s)", inSql),
+                String.format("SELECT * FROM user WHERE id IN (%s)", inSql),
                 new UserMapper(),
                 ids.toArray()
         );
@@ -121,11 +121,11 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteById(Long aLong) {
-        jdbcTemplate.update("DELETE FROM users WHERE id = ?", aLong);
+        jdbcTemplate.update("DELETE FROM \"user\" WHERE id = ?", aLong);
     }
 
     @Override
     public void delete(User entity) {
-        jdbcTemplate.update("DELETE FROM users WHERE id = ?", entity.getId());
+        jdbcTemplate.update("DELETE FROM \"user\" WHERE id = ?", entity.getId());
     }
 }
