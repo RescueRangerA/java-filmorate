@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
@@ -34,9 +33,9 @@ public class FilmService {
 
     @Autowired
     public FilmService(
-            @Qualifier("filmDbStorage") FilmStorage filmStorage,
-            @Qualifier("filmLikeDbStorage") FilmLikeStorage filmLikeStorage,
-            @Qualifier("userDbStorage") UserStorage userStorage,
+            FilmStorage filmStorage,
+            FilmLikeStorage filmLikeStorage,
+            UserStorage userStorage,
             GenreStorage genreStorage,
             FilmGenreStorage filmGenreStorage,
             MpaRatingStorage mpaRatingStorage

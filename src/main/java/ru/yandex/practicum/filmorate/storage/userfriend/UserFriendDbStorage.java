@@ -71,7 +71,7 @@ public class UserFriendDbStorage implements UserFriendStorage {
     }
 
     @Override
-    public UserFriend save(UserFriend entity) throws FriendOfHisOwnException {
+    public UserFriend save(UserFriend entity) {
         Assert.notNull(entity, "Entity must not be null.");
         Assert.notNull(entity.getFromUser().getId(), "From user id must not be null.");
         Assert.notNull(entity.getToUser().getId(), "To user id must not be null.");

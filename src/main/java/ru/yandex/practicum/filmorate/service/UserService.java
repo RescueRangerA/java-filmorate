@@ -1,13 +1,11 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.UserFriend;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import ru.yandex.practicum.filmorate.storage.userfriend.FriendOfHisOwnException;
 import ru.yandex.practicum.filmorate.storage.userfriend.UserFriendStorage;
 
 import java.util.List;
@@ -20,7 +18,7 @@ public class UserService {
     final private UserFriendStorage userFriendStorage;
 
     @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, @Qualifier("userFriendDbStorage") UserFriendStorage userFriendStorage) {
+    public UserService(UserStorage userStorage, UserFriendStorage userFriendStorage) {
         this.userStorage = userStorage;
         this.userFriendStorage = userFriendStorage;
     }
@@ -37,7 +35,7 @@ public class UserService {
         return userStorage.findById(userId).orElseThrow(() -> new EntityIsNotFoundException(User.class, 0L));
     }
 
-    public UserFriend addFriend(Long userIdA, Long userIdB) throws FriendOfHisOwnException {
+    public UserFriend addFriend(Long userIdA, Long userIdB) {
         Optional<User> userFrom = userStorage.findById(userIdA);
         Optional<User> userTo = userStorage.findById(userIdB);
 

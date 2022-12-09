@@ -9,7 +9,7 @@ public interface UserFriendStorage {
 
     Iterable<User> findFriendsOfUser(User user);
 
-    UserFriend save(UserFriend entity) throws FriendOfHisOwnException;
+    UserFriend save(UserFriend entity);
 
     void delete(UserFriend entity);
 

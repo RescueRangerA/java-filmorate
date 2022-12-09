@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.UserFriend;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.userfriend.FriendOfHisOwnException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -43,7 +42,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
-    public UserFriend addFriend(@PathVariable Long userId, @PathVariable Long friendId) throws FriendOfHisOwnException {
+    public UserFriend addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
         return userService.addFriend(userId, friendId);
     }
 
