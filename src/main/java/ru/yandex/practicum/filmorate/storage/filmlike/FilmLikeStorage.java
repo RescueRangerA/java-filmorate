@@ -4,11 +4,11 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmLike;
 
 public interface FilmLikeStorage {
-    Iterable<FilmLike> findAll();
+    Iterable<FilmLike> findFilmLikesAll();
 
-    FilmLike save(FilmLike entity);
+    FilmLike saveFilmLike(FilmLike entity);
 
-    void delete(FilmLike entity);
+    void deleteFilmLike(FilmLike entity);
 
-    Iterable<Film> getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit);
+    Iterable<Film> findTop10MostLikedFilms(Integer limit);
 }

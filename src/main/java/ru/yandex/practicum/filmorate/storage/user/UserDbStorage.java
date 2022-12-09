@@ -20,13 +20,13 @@ public class UserDbStorage implements UserStorage {
     public static class UserMapper implements RowMapper<User> {
         @Override
         public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Date birthDateParam = rs.getDate("birthday");
+            Date birthDateParam = rs.getDate("users.birthday");
 
             return new User(
-                    rs.getLong("id"),
-                    rs.getString("email"),
-                    rs.getString("login"),
-                    rs.getString("name"),
+                    rs.getLong("users.id"),
+                    rs.getString("users.email"),
+                    rs.getString("users.login"),
+                    rs.getString("users.name"),
                     birthDateParam != null ? birthDateParam.toLocalDate() : null
             );
         }

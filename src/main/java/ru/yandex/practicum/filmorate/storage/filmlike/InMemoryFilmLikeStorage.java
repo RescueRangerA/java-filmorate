@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.filmlike;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmLike;
@@ -18,12 +19,12 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
     private final FilmStorage filmStorage;
 
     @Autowired
-    public InMemoryFilmLikeStorage(FilmStorage filmStorage) {
+    public InMemoryFilmLikeStorage(@Qualifier("filmDbStorage") FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 
     @Override
-    public List<FilmLike> findAll() {
+    public List<FilmLike> findFilmLikesAll() {
         return new LinkedList<>(storage
                 .values().stream()
                 .map(Map::values)
@@ -38,7 +39,7 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
     }
 
     @Override
-    public FilmLike save(FilmLike entity) {
+    public FilmLike saveFilmLike(FilmLike entity) {
         Map<Long, FilmLike> filmLikesMapByUsers = storage.getOrDefault(entity.getFilm().getId(), new HashMap<>());
 
         if (filmLikesMapByUsers.containsKey(entity.getUser().getId())) {
@@ -52,7 +53,7 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
     }
 
     @Override
-    public void delete(FilmLike entity) {
+    public void deleteFilmLike(FilmLike entity) {
         Film film = entity.getFilm();
 
         Map<Long, FilmLike> filmLikesMapByUsers = storage.get(film.getId());
@@ -70,7 +71,7 @@ public class InMemoryFilmLikeStorage implements FilmLikeStorage {
     }
 
     @Override
-    public Iterable<Film> getFilmIdsAndGroupByFilmIdWithCountSumAndOrderByCountSumDescAndLimitN(Integer limit) {
+    public Iterable<Film> findTop10MostLikedFilms(Integer limit) {
         LinkedHashMap<Long, Integer> countSummary = new LinkedHashMap<>();
         storage.forEach((key, value) -> countSummary.put(key, value.size()));
 
