@@ -45,8 +45,6 @@ public class UserDbStorage implements UserStorage {
         }
 
         if (entity.getId() == null || entity.getId() == 0L) {
-            // https://stackoverflow.com/a/35089364
-
             GeneratedKeyHolder holder = new GeneratedKeyHolder();
             jdbcTemplate.update(con -> {
                 PreparedStatement statement = con.prepareStatement("INSERT INTO users (email, login, name, birthday) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);

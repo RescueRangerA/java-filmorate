@@ -7,11 +7,11 @@ public interface UserFriendStorage {
 
     Iterable<UserFriend> findAll();
 
-    Iterable<Long> findFriendsOfUser(User user);
+    Iterable<User> findFriendsOfUser(User user);
 
     UserFriend save(UserFriend entity) throws FriendOfHisOwnException;
 
     void delete(UserFriend entity);
 
-    Iterable<Long> findFriendsInCommonOf2Users(User userA, User userB);
+    Iterable<User> findFriendsInCommonOf2Users(User userA, User userB);
 }

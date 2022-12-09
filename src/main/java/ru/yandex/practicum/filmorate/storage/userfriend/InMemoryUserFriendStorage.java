@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.UserFriend;
 import ru.yandex.practicum.filmorate.util.Graph;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryUserFriendStorage implements UserFriendStorage {
@@ -17,8 +18,8 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
     }
 
     @Override
-    public Iterable<Long> findFriendsOfUser(User user) {
-        return new LinkedList<>(storage.getEdgesOfVertex(user.getId()).keySet());
+    public Iterable<User> findFriendsOfUser(User user) {
+        return storage.getEdgesOfVertex(user.getId()).values().stream().map(UserFriend::getToUser).collect(Collectors.toList());
     }
 
     @Override
@@ -41,13 +42,9 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
         UserFriend maybeExistingUserFriendEntity = storage.getEdge(toUserId, fromUserId);
 
         if (maybeExistingUserFriendEntity != null) {
-            entity.setStatus(UserFriend.Status.CONFIRMED);
-            maybeExistingUserFriendEntity.setStatus(UserFriend.Status.CONFIRMED);
-
             storage.addEdge(fromUserId, toUserId, entity);
             storage.addEdge(toUserId, fromUserId, maybeExistingUserFriendEntity);
         } else {
-            entity.setStatus(UserFriend.Status.PENDING);
             storage.addEdge(fromUserId, toUserId, entity);
         }
 
@@ -60,11 +57,20 @@ public class InMemoryUserFriendStorage implements UserFriendStorage {
     }
 
     @Override
-    public Iterable<Long> findFriendsInCommonOf2Users(User userA, User userB) {
-        Set<Long> friendsA = storage.getEdgesOfVertex(userA.getId()).keySet();
-        Set<Long> friendsB = storage.getEdgesOfVertex(userB.getId()).keySet();
-        friendsA.retainAll(friendsB);
+    public Iterable<User> findFriendsInCommonOf2Users(User userA, User userB) {
+        Set<User> friendsA = storage.getEdgesOfVertex(userA.getId()).values().stream().map(UserFriend::getToUser).collect(Collectors.toSet());
+        Set<User> friendsB = storage.getEdgesOfVertex(userB.getId()).values().stream().map(UserFriend::getToUser).collect(Collectors.toSet());
 
-        return new LinkedList<>(friendsA);
+        Set<User> result = new HashSet<>();
+
+        for (User friendOfA: friendsA){
+            for (User friendOfB: friendsB){
+                if ( Objects.equals(friendOfA.getId(), friendOfB.getId()) ) {
+                    result.add(friendOfA);
+                }
+            }
+        }
+
+        return new LinkedList<>(result);
     }
 }

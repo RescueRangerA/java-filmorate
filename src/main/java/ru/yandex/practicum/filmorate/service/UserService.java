@@ -20,7 +20,7 @@ public class UserService {
     final private UserFriendStorage userFriendStorage;
 
     @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, UserFriendStorage userFriendStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, @Qualifier("userFriendDbStorage") UserFriendStorage userFriendStorage) {
         this.userStorage = userStorage;
         this.userFriendStorage = userFriendStorage;
     }
@@ -79,12 +79,7 @@ public class UserService {
             throw new EntityIsNotFoundException(User.class, 0L);
         }
 
-        return (List<User>) userStorage.findAllById(
-                userFriendStorage.findFriendsInCommonOf2Users(
-                        userA.get(),
-                        userB.get()
-                )
-        );
+        return (List<User>) userFriendStorage.findFriendsInCommonOf2Users(userA.get(), userB.get());
     }
 
     public List<User> getFriends(Long userId) {
@@ -94,6 +89,6 @@ public class UserService {
             throw new EntityIsNotFoundException(User.class, 0L);
         }
 
-        return (List<User>) userStorage.findAllById(userFriendStorage.findFriendsOfUser(user.get()));
+        return (List<User>) userFriendStorage.findFriendsOfUser(user.get());
     }
 }

@@ -9,22 +9,9 @@ import javax.validation.constraints.Positive;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserFriend {
-    public enum Status {
-        PENDING, CONFIRMED
-    }
-
-    public UserFriend(User fromUser, User toUser) {
-        this.fromUser = fromUser;
-        this.toUser = toUser;
-        this.status = Status.PENDING;
-    }
-
     @Positive
     private User fromUser;
 
     @Positive
     private User toUser;
-
-    @Positive
-    private Status status;
 }
