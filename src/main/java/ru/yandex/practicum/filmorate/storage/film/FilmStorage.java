@@ -27,5 +27,5 @@ public interface FilmStorage {
 
     void deleteFilmLike(FilmLike entity);
 
-    Iterable<Film> findTop10MostLikedFilms(Integer limit);
+    Iterable<Film> findTopNMostLikedFilms(Integer limit);
 }

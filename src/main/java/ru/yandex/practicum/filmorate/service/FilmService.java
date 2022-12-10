@@ -75,7 +75,7 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer limit) {
-        return (List<Film>) filmStorage.findTop10MostLikedFilms(limit);
+        return (List<Film>) filmStorage.findTopNMostLikedFilms(limit);
     }
 
     public Genre findGenreById(Long aLong) {

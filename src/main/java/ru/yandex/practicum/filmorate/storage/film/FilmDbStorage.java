@@ -309,7 +309,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Iterable<Film> findTop10MostLikedFilms(Integer limit) {
+    public Iterable<Film> findTopNMostLikedFilms(Integer limit) {
         Assert.notNull(limit, "Limit must not be null.");
 
         if (limit < 1) {

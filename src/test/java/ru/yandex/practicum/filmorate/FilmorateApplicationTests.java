@@ -166,7 +166,7 @@ class FilmorateApplicationTests {
     @Test
     @Order(6)
     public void testGetPopularFilms() {
-        assertThat(filmDbStorage.findTop10MostLikedFilms(10))
+        assertThat(filmDbStorage.findTopNMostLikedFilms(10))
                 .hasSize(1)
                 .first()
                 .hasFieldOrPropertyWithValue("id", 1L);
