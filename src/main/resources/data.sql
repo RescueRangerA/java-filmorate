@@ -1,13 +1,12 @@
-INSERT INTO film_mpa_rating (title, description) VALUES ('G', 'У фильма нет возрастных ограничений') ON CONFLICT DO NOTHING;
-INSERT INTO film_mpa_rating (title, description) VALUES ('PG', 'Детям рекомендуется смотреть фильм с родителями') ON CONFLICT DO NOTHING;
-INSERT INTO film_mpa_rating (title, description) VALUES ('PG-13', 'Детям до 13 лет просмотр не желателен') ON CONFLICT DO NOTHING;
-INSERT INTO film_mpa_rating (title, description) VALUES ('R', 'Лицам до 17 лет просматривать фильм можно только в присутствии взрослого') ON CONFLICT DO NOTHING;
-INSERT INTO film_mpa_rating (title, description) VALUES ('NC-17', 'Лицам до 18 лет просмотр запрещён') ON CONFLICT DO NOTHING;
+MERGE INTO film_mpa_rating VALUES (1, 'G', 'У фильма нет возрастных ограничений');
+MERGE INTO film_mpa_rating VALUES (2, 'PG', 'Детям рекомендуется смотреть фильм с родителями');
+MERGE INTO film_mpa_rating VALUES (3, 'PG-13', 'Детям до 13 лет просмотр не желателен');
+MERGE INTO film_mpa_rating VALUES (4, 'R', 'Лицам до 17 лет просматривать фильм можно только в присутствии взрослого');
+MERGE INTO film_mpa_rating VALUES (5, 'NC-17', 'Лицам до 18 лет просмотр запрещён');
 
-
-INSERT INTO genre (title) VALUES ('Комедия') ON CONFLICT DO NOTHING;
-INSERT INTO genre (title) VALUES ('Драма') ON CONFLICT DO NOTHING;
-INSERT INTO genre (title) VALUES ('Мультфильм') ON CONFLICT DO NOTHING;
-INSERT INTO genre (title) VALUES ('Триллер') ON CONFLICT DO NOTHING;
-INSERT INTO genre (title) VALUES ('Документальный') ON CONFLICT DO NOTHING;
-INSERT INTO genre (title) VALUES ('Боевик') ON CONFLICT DO NOTHING;
+MERGE INTO genre VALUES (1, 'Комедия');
+MERGE INTO genre VALUES (2, 'Драма');
+MERGE INTO genre VALUES (3, 'Мультфильм');
+MERGE INTO genre VALUES (4, 'Триллер');
+MERGE INTO genre VALUES (5, 'Документальный');
+MERGE INTO genre VALUES (6, 'Боевик');

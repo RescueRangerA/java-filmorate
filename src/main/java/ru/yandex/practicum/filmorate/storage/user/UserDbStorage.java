@@ -199,7 +199,7 @@ public class UserDbStorage implements UserStorage {
         );
 
         jdbcTemplate.update(con -> {
-            PreparedStatement statement = con.prepareStatement("INSERT INTO user_friendship (from_user_id, to_user_id) VALUES (?,?) ON CONFLICT DO NOTHING");
+            PreparedStatement statement = con.prepareStatement("INSERT INTO user_friendship (from_user_id, to_user_id) VALUES (?,?)");
             statement.setLong(1, entity.getFromUser().getId());
             statement.setLong(2, entity.getToUser().getId());
             return statement;

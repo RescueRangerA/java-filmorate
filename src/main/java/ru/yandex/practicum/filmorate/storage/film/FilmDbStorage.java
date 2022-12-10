@@ -140,6 +140,10 @@ public class FilmDbStorage implements FilmStorage {
         );
 
         if (entity.getGenres().size() > 0) {
+            Set<Genre> genres = new TreeSet<>(Comparator.comparingLong(Genre::getId));
+            genres.addAll(entity.getGenres());
+            entity.setGenres(genres);
+
             try {
                 DataSource ds = jdbcTemplate.getDataSource();
                 Assert.notNull(ds);
@@ -147,7 +151,7 @@ public class FilmDbStorage implements FilmStorage {
                 connection.setAutoCommit(false);
 
                 PreparedStatement ps = connection.prepareStatement(
-                        "INSERT INTO film_genre (film_id, genre_id) VALUES (?,?) ON CONFLICT DO NOTHING"
+                        "INSERT INTO film_genre (film_id, genre_id) VALUES (?,?)"
                 );
 
                 for (Genre genre : entity.getGenres()) {
@@ -286,7 +290,7 @@ public class FilmDbStorage implements FilmStorage {
         Assert.notNull(entity.getUser().getId(), "User id must not be null.");
 
         jdbcTemplate.update(con -> {
-            PreparedStatement statement = con.prepareStatement("INSERT INTO film_like (film_id, user_id) VALUES (?,?) ON CONFLICT DO NOTHING");
+            PreparedStatement statement = con.prepareStatement("INSERT INTO film_like (film_id, user_id) VALUES (?,?)");
             statement.setLong(1, entity.getFilm().getId());
             statement.setLong(2, entity.getUser().getId());
             return statement;
