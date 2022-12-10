@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.UserFriend;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import ru.yandex.practicum.filmorate.storage.userfriend.UserFriendStorage;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,12 +14,9 @@ import java.util.Optional;
 public class UserService {
     final private UserStorage userStorage;
 
-    final private UserFriendStorage userFriendStorage;
-
     @Autowired
-    public UserService(UserStorage userStorage, UserFriendStorage userFriendStorage) {
+    public UserService(UserStorage userStorage) {
         this.userStorage = userStorage;
-        this.userFriendStorage = userFriendStorage;
     }
 
     public List<User> getAll() {
@@ -47,7 +43,7 @@ public class UserService {
             throw new EntityIsNotFoundException(User.class, 0L);
         }
 
-        return userFriendStorage.save(new UserFriend(userFrom.get(), userTo.get()));
+        return userStorage.saveUserFriend(new UserFriend(userFrom.get(), userTo.get()));
     }
 
     public void removeFriend(Long userIdA, Long userIdB) {
@@ -62,7 +58,7 @@ public class UserService {
             throw new EntityIsNotFoundException(User.class, 0L);
         }
 
-        userFriendStorage.delete(new UserFriend(userFrom.get(), userTo.get()));
+        userStorage.deleteUserFriend(new UserFriend(userFrom.get(), userTo.get()));
     }
 
     public List<User> getFriendsInCommon(Long userIdA, Long userIdB) {
@@ -77,7 +73,7 @@ public class UserService {
             throw new EntityIsNotFoundException(User.class, 0L);
         }
 
-        return (List<User>) userFriendStorage.findFriendsInCommonOf2Users(userA.get(), userB.get());
+        return (List<User>) userStorage.findFriendsInCommonOf2Users(userA.get(), userB.get());
     }
 
     public List<User> getFriends(Long userId) {
@@ -87,6 +83,6 @@ public class UserService {
             throw new EntityIsNotFoundException(User.class, 0L);
         }
 
-        return (List<User>) userFriendStorage.findFriendsOfUser(user.get());
+        return (List<User>) userStorage.findFriendsOfUser(user.get());
     }
 }

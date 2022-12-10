@@ -8,8 +8,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
-import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingDbStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
@@ -29,7 +30,28 @@ public class FilmDbStorage implements FilmStorage {
                     rs.getString("film.description"),
                     releaseDate != null ? releaseDate.toLocalDate() : null,
                     rs.getInt("film.duration"),
-                    (new MpaRatingDbStorage.MpaRatingMapper()).mapRow(rs, rowNum)
+                    (new MpaRatingMapper()).mapRow(rs, rowNum)
+            );
+        }
+    }
+
+    public static class MpaRatingMapper implements RowMapper<FilmMpaRating> {
+        @Override
+        public FilmMpaRating mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return new FilmMpaRating(
+                    rs.getLong("film_mpa_rating.id"),
+                    rs.getString("film_mpa_rating.title"),
+                    rs.getString("film_mpa_rating.description")
+            );
+        }
+    }
+
+    public static class FilmGenreMapper implements RowMapper<FilmGenre> {
+        @Override
+        public FilmGenre mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return new FilmGenre(
+                    (new FilmMapper()).mapRow(rs, rowNum),
+                    (new GenreDbStorage.GenreMapper()).mapRow(rs, rowNum)
             );
         }
     }
@@ -41,16 +63,34 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Iterable<Film> findAll() {
-        return jdbcTemplate.query(
-                "SELECT * FROM film LEFT JOIN film_mpa_rating as rating ON film.rating_id = rating.id",
-                new FilmMapper()
+    public Iterable<Film> findFilmsAll() {
+        Iterable<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
+                        "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                        "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                        "LEFT JOIN genre ON genre.id = film_genre.genre_id ",
+                new FilmGenreMapper()
         );
+
+
+        Map<Long, Film> films = new HashMap<>();
+        for (FilmGenre filmGenre : filmsWithGenres) {
+            Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
+
+            Genre genre = filmGenre.getGenre();
+            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
+                film.addGenre(genre);
+            }
+
+            films.put(film.getId(), film);
+        }
+
+        return new LinkedList<>(films.values());
     }
 
     @Override
-    public Film save(Film entity) {
-        Assert.notNull(entity, "Entity must not be null.");
+    public Film saveFilm(Film entity) {
+        Assert.notNull(entity, "Film must not be null.");
 
         if (entity.getId() == null || entity.getId() == 0L) {
             GeneratedKeyHolder holder = new GeneratedKeyHolder();
@@ -94,55 +134,196 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
 
+        jdbcTemplate.update(
+                "DELETE FROM film_genre WHERE film_id = ?",
+                entity.getId()
+        );
+
+        if (entity.getGenres().size() > 0) {
+            try {
+                DataSource ds = jdbcTemplate.getDataSource();
+                Assert.notNull(ds);
+                Connection connection = ds.getConnection();
+                connection.setAutoCommit(false);
+
+                PreparedStatement ps = connection.prepareStatement(
+                        "INSERT INTO film_genre (film_id, genre_id) VALUES (?,?) ON CONFLICT DO NOTHING"
+                );
+
+                for (Genre genre : entity.getGenres()) {
+                    if ( entity.getId() == null || genre.getId() == null ) {
+                        continue;
+                    }
+
+                    ps.setLong(1, entity.getId());
+                    ps.setLong(2, genre.getId());
+                    ps.addBatch();
+                }
+
+                ps.executeBatch();
+                ps.clearBatch();
+                connection.commit();
+                ps.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
         return entity;
     }
 
     @Override
-    public Optional<Film> findById(Long aLong) {
+    public Optional<Film> findFilmById(Long aLong) {
+        Assert.notNull(aLong, "Film id must not be null.");
+
+        Iterable<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
+                        "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                        "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                        "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                        "WHERE film.id = ?",
+                new FilmGenreMapper(),
+                aLong
+        );
+
+
         Film film = null;
+        for (FilmGenre filmGenre : filmsWithGenres) {
+            if (film == null) {
+                film = filmGenre.getFilm();
+            }
 
-        try {
-            film = jdbcTemplate.queryForObject(
-                    "SELECT * FROM film LEFT JOIN film_mpa_rating as rating ON film.rating_id = rating.id WHERE film.id = ?",
-                    new FilmMapper(),
-                    aLong
-            );
-        } catch (EmptyResultDataAccessException ignored) {
-
+            Genre genre = filmGenre.getGenre();
+            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
+                film.addGenre(genre);
+            }
         }
 
         return film != null ? Optional.of(film) : Optional.empty();
     }
 
     @Override
-    public Iterable<Film> findAllById(Iterable<Long> longs) {
+    public Iterable<Film> findFilmsAllById(Iterable<Long> longs) {
+        Assert.notNull(longs, "Film ids must not be null.");
+
         List<Long> ids = StreamSupport
                 .stream(longs.spliterator(), false)
                 .collect(Collectors.toList());
         String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
 
-        return jdbcTemplate.query(
-                String.format("SELECT * FROM film LEFT JOIN film_mpa_rating as rating ON film.rating_id = rating.id WHERE id IN (%s)", inSql),
-                new FilmMapper(),
+        Iterable<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+                String.format(
+                        "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
+                                "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                                "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                                "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                                "WHERE film.id IN (%s)", inSql),
+                new FilmGenreMapper(),
                 ids.toArray()
         );
+
+
+        Map<Long, Film> films = new HashMap<>();
+        for (FilmGenre filmGenre : filmsWithGenres) {
+            Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
+
+            Genre genre = filmGenre.getGenre();
+            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
+                film.addGenre(genre);
+            }
+
+            films.put(film.getId(), film);
+        }
+
+        return new LinkedList<>(films.values());
     }
 
     @Override
-    public void deleteById(Long aLong) {
+    public void deleteFilmById(Long aLong) {
+        Assert.notNull(aLong, "Film id must not be null.");
+
         jdbcTemplate.update("DELETE FROM film WHERE id = ?", aLong);
     }
 
     @Override
-    public void delete(Film entity) {
+    public void deleteFilm(Film entity) {
+        Assert.notNull(entity, "Film must not be null.");
+
         jdbcTemplate.update("DELETE FROM film WHERE id = ?", entity.getId());
     }
 
-    @Override
-    public Iterable<Film> findFirstN(Integer limit) {
+    public Iterable<FilmMpaRating> findMpaRatingsAll() {
         return jdbcTemplate.query(
-                "SELECT * FROM film LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id ORDER BY film.id LIMIT ?",
-                new FilmMapper(),
+                "SELECT film_mpa_rating.* FROM film_mpa_rating",
+                new MpaRatingMapper()
+        );
+    }
+
+    @Override
+    public Optional<FilmMpaRating> findMpaRatingById(Long aLong) {
+        Assert.notNull(aLong, "Rating id must not be null.");
+
+        FilmMpaRating genre = null;
+
+        try {
+            genre = jdbcTemplate.queryForObject(
+                    "SELECT film_mpa_rating.* FROM film_mpa_rating WHERE film_mpa_rating.id = ?",
+                    new MpaRatingMapper(),
+                    aLong
+            );
+        } catch (EmptyResultDataAccessException ignored) {
+
+        }
+
+        return genre != null ? Optional.of(genre) : Optional.empty();
+    }
+
+    @Override
+    public FilmLike saveFilmLike(FilmLike entity) {
+        Assert.notNull(entity, "Entity must not be null.");
+        Assert.notNull(entity.getFilm().getId(), "Film id must not be null.");
+        Assert.notNull(entity.getUser().getId(), "User id must not be null.");
+
+        jdbcTemplate.update(con -> {
+            PreparedStatement statement = con.prepareStatement("INSERT INTO film_like (film_id, user_id) VALUES (?,?) ON CONFLICT DO NOTHING");
+            statement.setLong(1, entity.getFilm().getId());
+            statement.setLong(2, entity.getUser().getId());
+            return statement;
+        });
+
+        return entity;
+    }
+
+    @Override
+    public void deleteFilmLike(FilmLike entity) {
+        Assert.notNull(entity, "Entity must not be null.");
+        Assert.notNull(entity.getFilm().getId(), "Film id must not be null.");
+        Assert.notNull(entity.getUser().getId(), "User id must not be null.");
+
+        jdbcTemplate.update(
+                "DELETE FROM film_like WHERE film_id = ? AND user_id = ?",
+                entity.getFilm().getId(),
+                entity.getUser().getId()
+        );
+    }
+
+    @Override
+    public Iterable<Film> findTop10MostLikedFilms(Integer limit) {
+        Assert.notNull(limit, "Limit must not be null.");
+
+        if (limit < 1) {
+            return List.of();
+        }
+
+        return jdbcTemplate.query(
+                "SELECT film.*,film_mpa_rating.*, COUNT(film_like.film_id) as likes FROM film " +
+                        "LEFT JOIN film_like ON film.id = film_like.film_id " +
+                        "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                        "GROUP BY film.id " +
+                        "ORDER BY likes DESC " +
+                        "LIMIT ?",
+                new FilmDbStorage.FilmMapper(),
                 limit
         );
     }

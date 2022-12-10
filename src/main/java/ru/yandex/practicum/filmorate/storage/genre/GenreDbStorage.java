@@ -4,6 +4,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
@@ -35,18 +36,20 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public Iterable<Genre> findAll() {
         return jdbcTemplate.query(
-                "SELECT * FROM genre",
+                "SELECT genre.* FROM genre",
                 new GenreMapper()
         );
     }
 
     @Override
     public Optional<Genre> findById(Long aLong) {
+        Assert.notNull(aLong, "Genre id must not be null.");
+
         Genre genre = null;
 
         try {
             genre = jdbcTemplate.queryForObject(
-                    "SELECT * FROM genre WHERE genre.id = ?",
+                    "SELECT genre.* FROM genre WHERE genre.id = ?",
                     new GenreMapper(),
                     aLong
             );
@@ -59,6 +62,8 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Iterable<Genre> findAllById(Iterable<Long> longs) {
+        Assert.notNull(longs, "Genre ids must not be null.");
+
         List<Long> ids = StreamSupport
                 .stream(longs.spliterator(), false)
                 .collect(Collectors.toList());

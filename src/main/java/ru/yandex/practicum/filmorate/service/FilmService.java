@@ -5,86 +5,47 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.filmgenre.FilmGenreStorage;
-import ru.yandex.practicum.filmorate.storage.filmlike.FilmLikeStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 public class FilmService {
     final private FilmStorage filmStorage;
 
-    final private FilmLikeStorage filmLikeStorage;
-
     final private UserStorage userStorage;
 
     final private GenreStorage genreStorage;
 
-    final private FilmGenreStorage filmGenreStorage;
-
-    final private MpaRatingStorage mpaRatingStorage;
-
     @Autowired
     public FilmService(
             FilmStorage filmStorage,
-            FilmLikeStorage filmLikeStorage,
             UserStorage userStorage,
-            GenreStorage genreStorage,
-            FilmGenreStorage filmGenreStorage,
-            MpaRatingStorage mpaRatingStorage
+            GenreStorage genreStorage
     ) {
         this.filmStorage = filmStorage;
-        this.filmLikeStorage = filmLikeStorage;
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
-        this.filmGenreStorage = filmGenreStorage;
-        this.mpaRatingStorage = mpaRatingStorage;
     }
 
     public List<Film> findAll() {
-        List<Film> listOfFilms = new ArrayList<>();
-
-        for (Film film : filmStorage.findAll()) {
-            film.setGenres(
-                    StreamSupport
-                            .stream(filmGenreStorage.findAllByFilm(film).spliterator(), false)
-                            .map(FilmGenre::getGenre)
-                            .collect(Collectors.toSet())
-            );
-
-            listOfFilms.add(film);
-        }
-
-        return listOfFilms;
+        return (List<Film>) filmStorage.findFilmsAll();
     }
 
     public Film save(Film film) {
-        Film newFilm = filmStorage.save(film);
-        filmGenreStorage.deleteAllByFilm(newFilm);
-        newFilm.getGenres().forEach((genre -> filmGenreStorage.saveFilmGenre(new FilmGenre(newFilm, genre))));
+        Film newFilm = filmStorage.saveFilm(film);
 
-        return getById(film.getId());
+        return getById(newFilm.getId());
     }
 
     public Film getById(Long filmId) {
-        Film newFilm = filmStorage.findById(filmId).orElseThrow(() -> new EntityIsNotFoundException(Film.class, filmId));
-        StreamSupport
-                .stream(filmGenreStorage.findAllByFilm(newFilm).spliterator(), false)
-                .map((FilmGenre::getGenre))
-                .forEach(newFilm::addGenre);
-
-        return newFilm;
+        return filmStorage.findFilmById(filmId).orElseThrow(() -> new EntityIsNotFoundException(Film.class, filmId));
     }
 
     public FilmLike addLike(Long filmId, Long userId) {
-        Optional<Film> film = filmStorage.findById(filmId);
+        Optional<Film> film = filmStorage.findFilmById(filmId);
         Optional<User> user = userStorage.findById(userId);
 
         if (film.isEmpty()) {
@@ -95,11 +56,11 @@ public class FilmService {
             throw new EntityIsNotFoundException(User.class, 0L);
         }
 
-        return filmLikeStorage.saveFilmLike(new FilmLike(film.get(), user.get()));
+        return filmStorage.saveFilmLike(new FilmLike(film.get(), user.get()));
     }
 
     public void removeLike(Long filmId, Long userId) {
-        Optional<Film> film = filmStorage.findById(filmId);
+        Optional<Film> film = filmStorage.findFilmById(filmId);
         Optional<User> user = userStorage.findById(userId);
 
         if (film.isEmpty()) {
@@ -110,11 +71,11 @@ public class FilmService {
             throw new EntityIsNotFoundException(User.class, 0L);
         }
 
-        filmLikeStorage.deleteFilmLike(new FilmLike(film.get(), user.get()));
+        filmStorage.deleteFilmLike(new FilmLike(film.get(), user.get()));
     }
 
     public List<Film> getPopularFilms(Integer limit) {
-        return (List<Film>) filmLikeStorage.findTop10MostLikedFilms(limit);
+        return (List<Film>) filmStorage.findTop10MostLikedFilms(limit);
     }
 
     public Genre findGenreById(Long aLong) {
@@ -126,10 +87,10 @@ public class FilmService {
     }
 
     public FilmMpaRating findRatingById(Long aLong) {
-        return mpaRatingStorage.findById(aLong).orElseThrow(() -> new EntityIsNotFoundException(FilmMpaRating.class, aLong));
+        return filmStorage.findMpaRatingById(aLong).orElseThrow(() -> new EntityIsNotFoundException(FilmMpaRating.class, aLong));
     }
 
     public Iterable<FilmMpaRating> findAllRatings() {
-        return mpaRatingStorage.findAll();
+        return filmStorage.findMpaRatingsAll();
     }
 }
