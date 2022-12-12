@@ -257,6 +257,7 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update("DELETE FROM film WHERE id = ?", entity.getId());
     }
 
+    @Override
     public Iterable<FilmMpaRating> findMpaRatingsAll() {
         return jdbcTemplate.query(
                 "SELECT film_mpa_rating.* FROM film_mpa_rating",
