@@ -49,11 +49,11 @@ public class FilmService {
         Optional<User> user = userStorage.findById(userId);
 
         if (film.isEmpty()) {
-            throw new EntityIsNotFoundException(Film.class, 0L);
+            throw new EntityIsNotFoundException(Film.class, filmId);
         }
 
         if (user.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, 0L);
+            throw new EntityIsNotFoundException(User.class, userId);
         }
 
         return filmStorage.saveFilmLike(new FilmLike(film.get(), user.get()));
@@ -64,11 +64,11 @@ public class FilmService {
         Optional<User> user = userStorage.findById(userId);
 
         if (film.isEmpty()) {
-            throw new EntityIsNotFoundException(Film.class, 0L);
+            throw new EntityIsNotFoundException(Film.class, filmId);
         }
 
         if (user.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, 0L);
+            throw new EntityIsNotFoundException(User.class, userId);
         }
 
         filmStorage.deleteFilmLike(new FilmLike(film.get(), user.get()));

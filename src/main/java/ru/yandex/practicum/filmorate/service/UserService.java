@@ -28,7 +28,7 @@ public class UserService {
     }
 
     public User getById(Long userId) {
-        return userStorage.findById(userId).orElseThrow(() -> new EntityIsNotFoundException(User.class, 0L));
+        return userStorage.findById(userId).orElseThrow(() -> new EntityIsNotFoundException(User.class, userId));
     }
 
     public UserFriend addFriend(Long userIdA, Long userIdB) {
@@ -36,11 +36,11 @@ public class UserService {
         Optional<User> userTo = userStorage.findById(userIdB);
 
         if (userFrom.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, 0L);
+            throw new EntityIsNotFoundException(User.class, userIdA);
         }
 
         if (userTo.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, 0L);
+            throw new EntityIsNotFoundException(User.class, userIdB);
         }
 
         return userStorage.saveUserFriend(new UserFriend(userFrom.get(), userTo.get()));
@@ -51,11 +51,11 @@ public class UserService {
         Optional<User> userTo = userStorage.findById(userIdB);
 
         if (userFrom.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, 0L);
+            throw new EntityIsNotFoundException(User.class, userIdA);
         }
 
         if (userTo.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, 0L);
+            throw new EntityIsNotFoundException(User.class, userIdB);
         }
 
         userStorage.deleteUserFriend(new UserFriend(userFrom.get(), userTo.get()));
@@ -66,11 +66,11 @@ public class UserService {
         Optional<User> userB = userStorage.findById(userIdB);
 
         if (userA.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, 0L);
+            throw new EntityIsNotFoundException(User.class, userIdA);
         }
 
         if (userB.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, 0L);
+            throw new EntityIsNotFoundException(User.class, userIdB);
         }
 
         return (List<User>) userStorage.findFriendsInCommonOf2Users(userA.get(), userB.get());
@@ -80,7 +80,7 @@ public class UserService {
         Optional<User> user = userStorage.findById(userId);
 
         if (user.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, 0L);
+            throw new EntityIsNotFoundException(User.class, userId);
         }
 
         return (List<User>) userStorage.findFriendsOfUser(user.get());
