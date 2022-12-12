@@ -23,13 +23,13 @@ public class UserDbStorage implements UserStorage {
     public static class UserMapper implements RowMapper<User> {
         @Override
         public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Date birthDateParam = rs.getDate("user.birthday");
+            Date birthDateParam = rs.getDate("account.birthday");
 
             return new User(
-                    rs.getLong("user.id"),
-                    rs.getString("user.email"),
-                    rs.getString("user.login"),
-                    rs.getString("user.name"),
+                    rs.getLong("account.id"),
+                    rs.getString("account.email"),
+                    rs.getString("account.login"),
+                    rs.getString("account.name"),
                     birthDateParam != null ? birthDateParam.toLocalDate() : null
             );
         }
@@ -75,7 +75,7 @@ public class UserDbStorage implements UserStorage {
         if (entity.getId() == null || entity.getId() == 0L) {
             GeneratedKeyHolder holder = new GeneratedKeyHolder();
             jdbcTemplate.update(con -> {
-                PreparedStatement statement = con.prepareStatement("INSERT INTO \"user\" (email, login, name, birthday) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement statement = con.prepareStatement("INSERT INTO account (email, login, name, birthday) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
                 statement.setString(1, entity.getEmail());
                 statement.setString(2, entity.getLogin());
                 statement.setString(3, entity.getName());
@@ -99,7 +99,7 @@ public class UserDbStorage implements UserStorage {
             entity.setId(newId);
         } else {
             int rowsAffected = jdbcTemplate.update(
-                    "UPDATE \"user\" SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?",
+                    "UPDATE account SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?",
                     entity.getEmail(),
                     entity.getLogin(),
                     entity.getName(),
@@ -122,7 +122,7 @@ public class UserDbStorage implements UserStorage {
         User user = null;
 
         try {
-            user = jdbcTemplate.queryForObject("SELECT \"user\".* FROM \"user\" WHERE id = ?", new UserMapper(), aLong);
+            user = jdbcTemplate.queryForObject("SELECT account.* FROM account WHERE id = ?", new UserMapper(), aLong);
         } catch (EmptyResultDataAccessException ignored) {
 
         }
@@ -132,7 +132,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Iterable<User> findAll() {
-        return jdbcTemplate.query("SELECT \"user\".* FROM \"user\"", new UserMapper());
+        return jdbcTemplate.query("SELECT account.* FROM account", new UserMapper());
     }
 
     @Override
@@ -145,7 +145,7 @@ public class UserDbStorage implements UserStorage {
         String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
 
         return jdbcTemplate.query(
-                String.format("SELECT * FROM user WHERE id IN (%s)", inSql),
+                String.format("SELECT account.* FROM account WHERE id IN (%s)", inSql),
                 new UserMapper(),
                 ids.toArray()
         );
@@ -155,22 +155,22 @@ public class UserDbStorage implements UserStorage {
     public void deleteById(Long aLong) {
         Assert.notNull(aLong, "User id must not be null.");
 
-        jdbcTemplate.update("DELETE FROM \"user\" WHERE id = ?", aLong);
+        jdbcTemplate.update("DELETE FROM account WHERE id = ?", aLong);
     }
 
     @Override
     public void delete(User entity) {
         Assert.notNull(entity, "User must not be null.");
 
-        jdbcTemplate.update("DELETE FROM \"user\" WHERE id = ?", entity.getId());
+        jdbcTemplate.update("DELETE FROM account WHERE id = ?", entity.getId());
     }
 
     @Override
     public Iterable<UserFriend> findUserFriendAll() {
         return jdbcTemplate.query(
-                "SELECT user_from.*, user_to.* FROM user_friendship " +
-                        "LEFT JOIN \"user\" as user_from ON user_from.id = user_friendship.from_user_id " +
-                        "LEFT JOIN \"user\" as user_to ON user_to.id = user_friendship.to_user_id ",
+                "SELECT user_from.*, user_to.* FROM account_friendship " +
+                        "LEFT JOIN account as user_from ON user_from.id = account_friendship.from_user_id " +
+                        "LEFT JOIN account as user_to ON user_to.id = account_friendship.to_user_id ",
                 new UserFriendMapper()
         );
     }
@@ -180,8 +180,8 @@ public class UserDbStorage implements UserStorage {
         Assert.notNull(user, "User must not be null.");
 
         return jdbcTemplate.query(
-                "SELECT \"user\".* FROM \"user\" " +
-                        "LEFT JOIN user_friendship as uf_to ON \"user\".id = uf_to.to_user_id " +
+                "SELECT account.* FROM account " +
+                        "LEFT JOIN account_friendship as uf_to ON account.id = uf_to.to_user_id " +
                         "WHERE (uf_to.from_user_id = ?)",
                 new UserMapper(),
                 user.getId()
@@ -199,7 +199,7 @@ public class UserDbStorage implements UserStorage {
         );
 
         jdbcTemplate.update(con -> {
-            PreparedStatement statement = con.prepareStatement("INSERT INTO user_friendship (from_user_id, to_user_id) VALUES (?,?)");
+            PreparedStatement statement = con.prepareStatement("INSERT INTO account_friendship (from_user_id, to_user_id) VALUES (?,?)");
             statement.setLong(1, entity.getFromUser().getId());
             statement.setLong(2, entity.getToUser().getId());
             return statement;
@@ -215,7 +215,7 @@ public class UserDbStorage implements UserStorage {
         Assert.notNull(entity.getToUser().getId(), "To user id must not be null.");
 
         jdbcTemplate.update(
-                "DELETE FROM user_friendship WHERE from_user_id IN (?,?) AND to_user_id IN (?,?)",
+                "DELETE FROM account_friendship WHERE from_user_id IN (?,?) AND to_user_id IN (?,?)",
                 entity.getFromUser().getId(),
                 entity.getToUser().getId(),
                 entity.getFromUser().getId(),
@@ -229,11 +229,11 @@ public class UserDbStorage implements UserStorage {
         Assert.notNull(userB, "User must not be null.");
 
         return jdbcTemplate.query(
-                "SELECT \"user\".* FROM \"user\" " +
-                        "LEFT JOIN user_friendship as uf_to ON \"user\".id = uf_to.to_user_id " +
+                "SELECT account.* FROM account " +
+                        "LEFT JOIN account_friendship as uf_to ON account.id = uf_to.to_user_id " +
                         "WHERE uf_to.from_user_id IN (?,?) " +
-                        "GROUP BY \"user\".id " +
-                        "HAVING COUNT(\"user\".id) = 2",
+                        "GROUP BY account.id " +
+                        "HAVING COUNT(account.id) = 2",
                 new UserMapper(),
                 userA.getId(),
                 userB.getId()
