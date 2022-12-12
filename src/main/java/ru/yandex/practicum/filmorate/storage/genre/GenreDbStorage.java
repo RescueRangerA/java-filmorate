@@ -12,8 +12,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Component
 public class GenreDbStorage implements GenreStorage {
@@ -34,7 +32,7 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Iterable<Genre> findAll() {
+    public List<Genre> findAll() {
         return jdbcTemplate.query(
                 "SELECT genre.* FROM genre",
                 new GenreMapper()
@@ -61,18 +59,15 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Iterable<Genre> findAllById(Iterable<Long> genreIds) {
+    public List<Genre> findAllById(List<Long> genreIds) {
         Assert.notNull(genreIds, "Genre ids must not be null.");
 
-        List<Long> ids = StreamSupport
-                .stream(genreIds.spliterator(), false)
-                .collect(Collectors.toList());
-        String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
+        String inSql = String.join(",", Collections.nCopies(genreIds.size(), "?"));
 
         return jdbcTemplate.query(
                 String.format("SELECT * FROM genre WHERE id IN (%s)", inSql),
                 new GenreMapper(),
-                ids.toArray()
+                genreIds.toArray()
         );
     }
 }

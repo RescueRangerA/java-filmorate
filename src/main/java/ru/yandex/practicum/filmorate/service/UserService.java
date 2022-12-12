@@ -20,7 +20,7 @@ public class UserService {
     }
 
     public List<User> getAll() {
-        return (List<User>) userStorage.findAll();
+        return userStorage.findAll();
     }
 
     public User save(User user) {
@@ -73,7 +73,7 @@ public class UserService {
             throw new EntityIsNotFoundException(User.class, userIdB);
         }
 
-        return (List<User>) userStorage.findFriendsInCommonOf2Users(userA.get(), userB.get());
+        return userStorage.findFriendsInCommonOf2Users(userA.get(), userB.get());
     }
 
     public List<User> getFriends(Long userId) {
@@ -83,6 +83,6 @@ public class UserService {
             throw new EntityIsNotFoundException(User.class, userId);
         }
 
-        return (List<User>) userStorage.findFriendsOfUser(user.get());
+        return userStorage.findFriendsOfUser(user.get());
     }
 }

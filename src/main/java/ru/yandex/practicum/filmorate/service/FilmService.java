@@ -40,7 +40,7 @@ public class FilmService {
     }
 
     public List<Film> findAll() {
-        return (List<Film>) filmStorage.findFilmsAll();
+        return filmStorage.findFilmsAll();
     }
 
     public Film save(Film film) {
@@ -86,14 +86,14 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer limit) {
-        return (List<Film>) filmStorage.findTopNMostLikedFilms(limit);
+        return filmStorage.findTopNMostLikedFilms(limit);
     }
 
     public Genre findGenreById(Long aLong) {
         return genreStorage.findById(aLong).orElseThrow(() -> new EntityIsNotFoundException(Genre.class, aLong));
     }
 
-    public Iterable<Genre> findAllGenres() {
+    public List<Genre> findAllGenres() {
         return genreStorage.findAll();
     }
 
@@ -101,7 +101,7 @@ public class FilmService {
         return mpaRatingStorage.findById(aLong).orElseThrow(() -> new EntityIsNotFoundException(FilmMpaRating.class, aLong));
     }
 
-    public Iterable<FilmMpaRating> findAllRatings() {
+    public List<FilmMpaRating> findAllRatings() {
         return mpaRatingStorage.findAll();
     }
 }

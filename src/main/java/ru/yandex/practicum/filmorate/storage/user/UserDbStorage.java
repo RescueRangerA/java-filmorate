@@ -15,8 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Component
 public class UserDbStorage implements UserStorage {
@@ -131,23 +129,20 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Iterable<User> findAll() {
+    public List<User> findAll() {
         return jdbcTemplate.query("SELECT account.* FROM account", new UserMapper());
     }
 
     @Override
-    public Iterable<User> findAllById(Iterable<Long> userIds) {
+    public List<User> findAllById(List<Long> userIds) {
         Assert.notNull(userIds, "User ids must not be null.");
 
-        List<Long> ids = StreamSupport
-                .stream(userIds.spliterator(), false)
-                .collect(Collectors.toList());
-        String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
+        String inSql = String.join(",", Collections.nCopies(userIds.size(), "?"));
 
         return jdbcTemplate.query(
                 String.format("SELECT account.* FROM account WHERE id IN (%s)", inSql),
                 new UserMapper(),
-                ids.toArray()
+                userIds.toArray()
         );
     }
 
@@ -159,17 +154,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Iterable<UserFriend> findUserFriendAll() {
-        return jdbcTemplate.query(
-                "SELECT user_from.*, user_to.* FROM account_friendship " +
-                        "LEFT JOIN account as user_from ON user_from.id = account_friendship.from_user_id " +
-                        "LEFT JOIN account as user_to ON user_to.id = account_friendship.to_user_id ",
-                new UserFriendMapper()
-        );
-    }
-
-    @Override
-    public Iterable<User> findFriendsOfUser(User userEntity) {
+    public List<User> findFriendsOfUser(User userEntity) {
         Assert.notNull(userEntity, "User must not be null.");
 
         return jdbcTemplate.query(
@@ -217,7 +202,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Iterable<User> findFriendsInCommonOf2Users(User userEntityA, User userEntityB) {
+    public List<User> findFriendsInCommonOf2Users(User userEntityA, User userEntityB) {
         Assert.notNull(userEntityA, "User must not be null.");
         Assert.notNull(userEntityB, "User must not be null.");
 

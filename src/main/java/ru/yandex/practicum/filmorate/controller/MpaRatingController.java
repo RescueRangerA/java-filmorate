@@ -22,7 +22,7 @@ public class MpaRatingController {
 
     @GetMapping
     public List<FilmMpaRating> findAll() {
-        return (List<FilmMpaRating>) filmService.findAllRatings();
+        return filmService.findAllRatings();
     }
 
     @GetMapping("/{id}")

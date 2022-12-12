@@ -13,8 +13,6 @@ import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingDbStorage;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Component
 public class FilmDbStorage implements FilmStorage {
@@ -51,8 +49,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Iterable<Film> findFilmsAll() {
-        Iterable<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+    public List<Film> findFilmsAll() {
+        List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
                 "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
                         "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
                         "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
@@ -129,7 +127,7 @@ public class FilmDbStorage implements FilmStorage {
     public Optional<Film> findFilmById(Long filmId) {
         Assert.notNull(filmId, "Film id must not be null.");
 
-        Iterable<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+        List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
                 "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
                         "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
                         "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
@@ -156,15 +154,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Iterable<Film> findFilmsAllById(Iterable<Long> filmIds) {
+    public List<Film> findFilmsAllById(List<Long> filmIds) {
         Assert.notNull(filmIds, "Film ids must not be null.");
 
-        List<Long> ids = StreamSupport
-                .stream(filmIds.spliterator(), false)
-                .collect(Collectors.toList());
-        String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
+        String inSql = String.join(",", Collections.nCopies(filmIds.size(), "?"));
 
-        Iterable<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+        List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
                 String.format(
                         "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
                                 "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
@@ -172,7 +167,7 @@ public class FilmDbStorage implements FilmStorage {
                                 "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
                                 "WHERE film.id IN (%s)", inSql),
                 new FilmGenreMapper(),
-                ids.toArray()
+                filmIds.toArray()
         );
 
 
@@ -228,7 +223,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Iterable<Film> findTopNMostLikedFilms(Integer limit) {
+    public List<Film> findTopNMostLikedFilms(Integer limit) {
         Assert.notNull(limit, "Limit must not be null.");
 
         if (limit < 1) {
