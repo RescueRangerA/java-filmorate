@@ -30,7 +30,7 @@ public class FilmDbStorage implements FilmStorage {
                     rs.getString("film.description"),
                     releaseDate != null ? releaseDate.toLocalDate() : null,
                     rs.getInt("film.duration"),
-                    (new MpaRatingMapper()).mapRow(rs, rowNum)
+                    new MpaRatingMapper().mapRow(rs, rowNum)
             );
         }
     }
@@ -50,8 +50,8 @@ public class FilmDbStorage implements FilmStorage {
         @Override
         public FilmGenre mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new FilmGenre(
-                    (new FilmMapper()).mapRow(rs, rowNum),
-                    (new GenreDbStorage.GenreMapper()).mapRow(rs, rowNum)
+                    new FilmMapper().mapRow(rs, rowNum),
+                    new GenreDbStorage.GenreMapper().mapRow(rs, rowNum)
             );
         }
     }
