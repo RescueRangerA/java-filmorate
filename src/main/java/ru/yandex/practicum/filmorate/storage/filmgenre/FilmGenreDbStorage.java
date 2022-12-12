@@ -23,11 +23,11 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     }
 
     @Override
-    public Film saveGenresOfTheFilm(Film film) {
-        if (film.getGenres().size() > 0) {
+    public Film saveGenresOfTheFilm(Film filmEntity) {
+        if (filmEntity.getGenres().size() > 0) {
             Set<Genre> genres = new TreeSet<>(Comparator.comparingLong(Genre::getId));
-            genres.addAll(film.getGenres());
-            film.setGenres(genres);
+            genres.addAll(filmEntity.getGenres());
+            filmEntity.setGenres(genres);
 
             try {
                 DataSource ds = jdbcTemplate.getDataSource();
@@ -39,12 +39,12 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
                         "INSERT INTO film_genre (film_id, genre_id) VALUES (?,?)"
                 );
 
-                for (Genre genre : film.getGenres()) {
-                    if (film.getId() == null || genre.getId() == null) {
+                for (Genre genre : filmEntity.getGenres()) {
+                    if (filmEntity.getId() == null || genre.getId() == null) {
                         continue;
                     }
 
-                    ps.setLong(1, film.getId());
+                    ps.setLong(1, filmEntity.getId());
                     ps.setLong(2, genre.getId());
                     ps.addBatch();
                 }
@@ -59,16 +59,16 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
 
         }
 
-        return film;
+        return filmEntity;
     }
 
     @Override
-    public void deleteAllGenresOfTheFilm(Film film) {
-        Assert.notNull(film, "Entity must not be null.");
+    public void deleteAllGenresOfTheFilm(Film filmEntity) {
+        Assert.notNull(filmEntity, "Entity must not be null.");
 
         jdbcTemplate.update(
                 "DELETE FROM film_genre WHERE film_id = ?",
-                film.getId()
+                filmEntity.getId()
         );
     }
 }

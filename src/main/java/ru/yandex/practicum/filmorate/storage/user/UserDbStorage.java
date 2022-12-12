@@ -69,17 +69,17 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User save(User entity) {
-        Assert.notNull(entity, "User must not be null.");
+    public User save(User userEntity) {
+        Assert.notNull(userEntity, "User must not be null.");
 
-        if (entity.getId() == null || entity.getId() == 0L) {
+        if (userEntity.getId() == null || userEntity.getId() == 0L) {
             GeneratedKeyHolder holder = new GeneratedKeyHolder();
             jdbcTemplate.update(con -> {
                 PreparedStatement statement = con.prepareStatement("INSERT INTO account (email, login, name, birthday) VALUES (?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-                statement.setString(1, entity.getEmail());
-                statement.setString(2, entity.getLogin());
-                statement.setString(3, entity.getName());
-                statement.setDate(4, Date.valueOf(entity.getBirthday()));
+                statement.setString(1, userEntity.getEmail());
+                statement.setString(2, userEntity.getLogin());
+                statement.setString(3, userEntity.getName());
+                statement.setDate(4, Date.valueOf(userEntity.getBirthday()));
                 return statement;
             }, holder);
 
@@ -96,33 +96,33 @@ public class UserDbStorage implements UserStorage {
                 throw new RuntimeException("Cannot insert the user");
             }
 
-            entity.setId(newId);
+            userEntity.setId(newId);
         } else {
             int rowsAffected = jdbcTemplate.update(
                     "UPDATE account SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?",
-                    entity.getEmail(),
-                    entity.getLogin(),
-                    entity.getName(),
-                    entity.getBirthday(),
-                    entity.getId()
+                    userEntity.getEmail(),
+                    userEntity.getLogin(),
+                    userEntity.getName(),
+                    userEntity.getBirthday(),
+                    userEntity.getId()
             );
 
             if (rowsAffected == 0) {
-                throw new EntityIsNotFoundException(User.class, entity.getId());
+                throw new EntityIsNotFoundException(User.class, userEntity.getId());
             }
         }
 
-        return entity;
+        return userEntity;
     }
 
     @Override
-    public Optional<User> findById(Long aLong) {
-        Assert.notNull(aLong, "User id must not be null.");
+    public Optional<User> findById(Long userId) {
+        Assert.notNull(userId, "User id must not be null.");
 
         User user = null;
 
         try {
-            user = jdbcTemplate.queryForObject("SELECT account.* FROM account WHERE id = ?", new UserMapper(), aLong);
+            user = jdbcTemplate.queryForObject("SELECT account.* FROM account WHERE id = ?", new UserMapper(), userId);
         } catch (EmptyResultDataAccessException ignored) {
 
         }
@@ -136,11 +136,11 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Iterable<User> findAllById(Iterable<Long> longs) {
-        Assert.notNull(longs, "User ids must not be null.");
+    public Iterable<User> findAllById(Iterable<Long> userIds) {
+        Assert.notNull(userIds, "User ids must not be null.");
 
         List<Long> ids = StreamSupport
-                .stream(longs.spliterator(), false)
+                .stream(userIds.spliterator(), false)
                 .collect(Collectors.toList());
         String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
 
@@ -152,17 +152,17 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void deleteById(Long aLong) {
-        Assert.notNull(aLong, "User id must not be null.");
+    public void deleteById(Long userId) {
+        Assert.notNull(userId, "User id must not be null.");
 
-        jdbcTemplate.update("DELETE FROM account WHERE id = ?", aLong);
+        jdbcTemplate.update("DELETE FROM account WHERE id = ?", userId);
     }
 
     @Override
-    public void delete(User entity) {
-        Assert.notNull(entity, "User must not be null.");
+    public void delete(User userEntity) {
+        Assert.notNull(userEntity, "User must not be null.");
 
-        jdbcTemplate.update("DELETE FROM account WHERE id = ?", entity.getId());
+        jdbcTemplate.update("DELETE FROM account WHERE id = ?", userEntity.getId());
     }
 
     @Override
@@ -176,57 +176,57 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Iterable<User> findFriendsOfUser(User user) {
-        Assert.notNull(user, "User must not be null.");
+    public Iterable<User> findFriendsOfUser(User userEntity) {
+        Assert.notNull(userEntity, "User must not be null.");
 
         return jdbcTemplate.query(
                 "SELECT account.* FROM account " +
                         "LEFT JOIN account_friendship as uf_to ON account.id = uf_to.to_user_id " +
                         "WHERE (uf_to.from_user_id = ?)",
                 new UserMapper(),
-                user.getId()
+                userEntity.getId()
         );
     }
 
     @Override
-    public UserFriend saveUserFriend(UserFriend entity) {
-        Assert.notNull(entity, "Entity must not be null.");
-        Assert.notNull(entity.getFromUser().getId(), "From user id must not be null.");
-        Assert.notNull(entity.getToUser().getId(), "To user id must not be null.");
+    public UserFriend saveUserFriend(UserFriend userFriendEntity) {
+        Assert.notNull(userFriendEntity, "Entity must not be null.");
+        Assert.notNull(userFriendEntity.getFromUser().getId(), "From user id must not be null.");
+        Assert.notNull(userFriendEntity.getToUser().getId(), "To user id must not be null.");
         Assert.isTrue(
-                !Objects.equals(entity.getFromUser().getId(), entity.getToUser().getId()),
+                !Objects.equals(userFriendEntity.getFromUser().getId(), userFriendEntity.getToUser().getId()),
                 "Equal from user id and to user id are not allowed"
         );
 
         jdbcTemplate.update(con -> {
             PreparedStatement statement = con.prepareStatement("INSERT INTO account_friendship (from_user_id, to_user_id) VALUES (?,?)");
-            statement.setLong(1, entity.getFromUser().getId());
-            statement.setLong(2, entity.getToUser().getId());
+            statement.setLong(1, userFriendEntity.getFromUser().getId());
+            statement.setLong(2, userFriendEntity.getToUser().getId());
             return statement;
         });
 
-        return entity;
+        return userFriendEntity;
     }
 
     @Override
-    public void deleteUserFriend(UserFriend entity) {
-        Assert.notNull(entity, "Entity must not be null.");
-        Assert.notNull(entity.getFromUser().getId(), "From user id must not be null.");
-        Assert.notNull(entity.getToUser().getId(), "To user id must not be null.");
+    public void deleteUserFriend(UserFriend userFriendEntity) {
+        Assert.notNull(userFriendEntity, "Entity must not be null.");
+        Assert.notNull(userFriendEntity.getFromUser().getId(), "From user id must not be null.");
+        Assert.notNull(userFriendEntity.getToUser().getId(), "To user id must not be null.");
 
         jdbcTemplate.update(
                 "DELETE FROM account_friendship WHERE from_user_id IN (?,?) AND to_user_id IN (?,?)",
-                entity.getFromUser().getId(),
-                entity.getToUser().getId(),
-                entity.getFromUser().getId(),
-                entity.getToUser().getId()
+                userFriendEntity.getFromUser().getId(),
+                userFriendEntity.getToUser().getId(),
+                userFriendEntity.getFromUser().getId(),
+                userFriendEntity.getToUser().getId()
         );
     }
 
     @Override
-    public Iterable<User> findFriendsInCommonOf2Users(User userA, User userB) {
-        Assert.notNull(userA, "User must not be null.");
-        Assert.notNull(userB, "User must not be null.");
+    public Iterable<User> findFriendsInCommonOf2Users(User userEntityA, User userEntityB) {
+        Assert.notNull(userEntityA, "User must not be null.");
+        Assert.notNull(userEntityB, "User must not be null.");
 
         return jdbcTemplate.query(
                 "SELECT account.* FROM account " +
@@ -235,8 +235,8 @@ public class UserDbStorage implements UserStorage {
                         "GROUP BY account.id " +
                         "HAVING COUNT(account.id) = 2",
                 new UserMapper(),
-                userA.getId(),
-                userB.getId()
+                userEntityA.getId(),
+                userEntityB.getId()
         );
     }
 }

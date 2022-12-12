@@ -42,8 +42,8 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Optional<Genre> findById(Long aLong) {
-        Assert.notNull(aLong, "Genre id must not be null.");
+    public Optional<Genre> findById(Long genreId) {
+        Assert.notNull(genreId, "Genre id must not be null.");
 
         Genre genre = null;
 
@@ -51,7 +51,7 @@ public class GenreDbStorage implements GenreStorage {
             genre = jdbcTemplate.queryForObject(
                     "SELECT genre.* FROM genre WHERE genre.id = ?",
                     new GenreMapper(),
-                    aLong
+                    genreId
             );
         } catch (EmptyResultDataAccessException ignored) {
 
@@ -61,11 +61,11 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Iterable<Genre> findAllById(Iterable<Long> longs) {
-        Assert.notNull(longs, "Genre ids must not be null.");
+    public Iterable<Genre> findAllById(Iterable<Long> genreIds) {
+        Assert.notNull(genreIds, "Genre ids must not be null.");
 
         List<Long> ids = StreamSupport
-                .stream(longs.spliterator(), false)
+                .stream(genreIds.spliterator(), false)
                 .collect(Collectors.toList());
         String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
 

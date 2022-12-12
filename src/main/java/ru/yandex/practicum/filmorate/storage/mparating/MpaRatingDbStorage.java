@@ -40,8 +40,8 @@ public class MpaRatingDbStorage implements MpaRatingStorage {
     }
 
     @Override
-    public Optional<FilmMpaRating> findById(Long aLong) {
-        Assert.notNull(aLong, "Rating id must not be null.");
+    public Optional<FilmMpaRating> findById(Long ratingId) {
+        Assert.notNull(ratingId, "Rating id must not be null.");
 
         FilmMpaRating rating = null;
 
@@ -49,7 +49,7 @@ public class MpaRatingDbStorage implements MpaRatingStorage {
             rating = jdbcTemplate.queryForObject(
                     "SELECT film_mpa_rating.* FROM film_mpa_rating WHERE film_mpa_rating.id = ?",
                     new MpaRatingMapper(),
-                    aLong
+                    ratingId
             );
         } catch (EmptyResultDataAccessException ignored) {
 

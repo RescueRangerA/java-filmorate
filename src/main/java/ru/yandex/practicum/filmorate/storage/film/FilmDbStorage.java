@@ -77,18 +77,18 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film saveFilm(Film entity) {
-        Assert.notNull(entity, "Film must not be null.");
+    public Film saveFilm(Film filmEntity) {
+        Assert.notNull(filmEntity, "Film must not be null.");
 
-        if (entity.getId() == null || entity.getId() == 0L) {
+        if (filmEntity.getId() == null || filmEntity.getId() == 0L) {
             GeneratedKeyHolder holder = new GeneratedKeyHolder();
             jdbcTemplate.update(con -> {
                 PreparedStatement statement = con.prepareStatement("INSERT INTO film (title, description, release_date, duration, rating_id) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-                statement.setString(1, entity.getName());
-                statement.setString(2, entity.getDescription());
-                statement.setDate(3, Date.valueOf(entity.getReleaseDate()));
-                statement.setInt(4, entity.getDuration());
-                statement.setLong(5, entity.getMpa().getId() != null ? entity.getMpa().getId() : 0L);
+                statement.setString(1, filmEntity.getName());
+                statement.setString(2, filmEntity.getDescription());
+                statement.setDate(3, Date.valueOf(filmEntity.getReleaseDate()));
+                statement.setInt(4, filmEntity.getDuration());
+                statement.setLong(5, filmEntity.getMpa().getId() != null ? filmEntity.getMpa().getId() : 0L);
                 return statement;
             }, holder);
 
@@ -105,29 +105,29 @@ public class FilmDbStorage implements FilmStorage {
                 throw new RuntimeException("Cannot insert the film");
             }
 
-            entity.setId(newId);
+            filmEntity.setId(newId);
         } else {
             int rowsAffected = jdbcTemplate.update(
                     "UPDATE film SET title = ?, description = ?, release_date = ?, duration = ?, rating_id = ? WHERE id = ?",
-                    entity.getName(),
-                    entity.getDescription(),
-                    entity.getReleaseDate(),
-                    entity.getDuration(),
-                    entity.getMpa().getId(),
-                    entity.getId()
+                    filmEntity.getName(),
+                    filmEntity.getDescription(),
+                    filmEntity.getReleaseDate(),
+                    filmEntity.getDuration(),
+                    filmEntity.getMpa().getId(),
+                    filmEntity.getId()
             );
 
             if (rowsAffected == 0) {
-                throw new EntityIsNotFoundException(Film.class, entity.getId());
+                throw new EntityIsNotFoundException(Film.class, filmEntity.getId());
             }
         }
 
-        return entity;
+        return filmEntity;
     }
 
     @Override
-    public Optional<Film> findFilmById(Long aLong) {
-        Assert.notNull(aLong, "Film id must not be null.");
+    public Optional<Film> findFilmById(Long filmId) {
+        Assert.notNull(filmId, "Film id must not be null.");
 
         Iterable<FilmGenre> filmsWithGenres = jdbcTemplate.query(
                 "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
@@ -136,7 +136,7 @@ public class FilmDbStorage implements FilmStorage {
                         "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
                         "WHERE film.id = ?",
                 new FilmGenreMapper(),
-                aLong
+                filmId
         );
 
 
@@ -156,11 +156,11 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Iterable<Film> findFilmsAllById(Iterable<Long> longs) {
-        Assert.notNull(longs, "Film ids must not be null.");
+    public Iterable<Film> findFilmsAllById(Iterable<Long> filmIds) {
+        Assert.notNull(filmIds, "Film ids must not be null.");
 
         List<Long> ids = StreamSupport
-                .stream(longs.spliterator(), false)
+                .stream(filmIds.spliterator(), false)
                 .collect(Collectors.toList());
         String inSql = String.join(",", Collections.nCopies(ids.size(), "?"));
 
@@ -192,33 +192,33 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilmById(Long aLong) {
-        Assert.notNull(aLong, "Film id must not be null.");
+    public void deleteFilmById(Long filmId) {
+        Assert.notNull(filmId, "Film id must not be null.");
 
-        jdbcTemplate.update("DELETE FROM film WHERE id = ?", aLong);
+        jdbcTemplate.update("DELETE FROM film WHERE id = ?", filmId);
     }
 
     @Override
-    public void deleteFilm(Film entity) {
-        Assert.notNull(entity, "Film must not be null.");
+    public void deleteFilm(Film filmEntity) {
+        Assert.notNull(filmEntity, "Film must not be null.");
 
-        jdbcTemplate.update("DELETE FROM film WHERE id = ?", entity.getId());
+        jdbcTemplate.update("DELETE FROM film WHERE id = ?", filmEntity.getId());
     }
 
     @Override
-    public FilmLike saveFilmLike(FilmLike entity) {
-        Assert.notNull(entity, "Entity must not be null.");
-        Assert.notNull(entity.getFilm().getId(), "Film id must not be null.");
-        Assert.notNull(entity.getUser().getId(), "User id must not be null.");
+    public FilmLike saveFilmLike(FilmLike filmLikeEntity) {
+        Assert.notNull(filmLikeEntity, "Entity must not be null.");
+        Assert.notNull(filmLikeEntity.getFilm().getId(), "Film id must not be null.");
+        Assert.notNull(filmLikeEntity.getUser().getId(), "User id must not be null.");
 
         jdbcTemplate.update(con -> {
             PreparedStatement statement = con.prepareStatement("INSERT INTO film_like (film_id, user_id) VALUES (?,?)");
-            statement.setLong(1, entity.getFilm().getId());
-            statement.setLong(2, entity.getUser().getId());
+            statement.setLong(1, filmLikeEntity.getFilm().getId());
+            statement.setLong(2, filmLikeEntity.getUser().getId());
             return statement;
         });
 
-        return entity;
+        return filmLikeEntity;
     }
 
     @Override
