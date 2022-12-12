@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -9,8 +8,8 @@ import org.springframework.util.Assert;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingDbStorage;
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
@@ -30,18 +29,7 @@ public class FilmDbStorage implements FilmStorage {
                     rs.getString("film.description"),
                     releaseDate != null ? releaseDate.toLocalDate() : null,
                     rs.getInt("film.duration"),
-                    new MpaRatingMapper().mapRow(rs, rowNum)
-            );
-        }
-    }
-
-    public static class MpaRatingMapper implements RowMapper<FilmMpaRating> {
-        @Override
-        public FilmMpaRating mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new FilmMpaRating(
-                    rs.getLong("film_mpa_rating.id"),
-                    rs.getString("film_mpa_rating.title"),
-                    rs.getString("film_mpa_rating.description")
+                    new MpaRatingDbStorage.MpaRatingMapper().mapRow(rs, rowNum)
             );
         }
     }
@@ -134,46 +122,6 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
 
-        jdbcTemplate.update(
-                "DELETE FROM film_genre WHERE film_id = ?",
-                entity.getId()
-        );
-
-        if (entity.getGenres().size() > 0) {
-            Set<Genre> genres = new TreeSet<>(Comparator.comparingLong(Genre::getId));
-            genres.addAll(entity.getGenres());
-            entity.setGenres(genres);
-
-            try {
-                DataSource ds = jdbcTemplate.getDataSource();
-                Assert.notNull(ds);
-                Connection connection = ds.getConnection();
-                connection.setAutoCommit(false);
-
-                PreparedStatement ps = connection.prepareStatement(
-                        "INSERT INTO film_genre (film_id, genre_id) VALUES (?,?)"
-                );
-
-                for (Genre genre : entity.getGenres()) {
-                    if ( entity.getId() == null || genre.getId() == null ) {
-                        continue;
-                    }
-
-                    ps.setLong(1, entity.getId());
-                    ps.setLong(2, genre.getId());
-                    ps.addBatch();
-                }
-
-                ps.executeBatch();
-                ps.clearBatch();
-                connection.commit();
-                ps.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-
         return entity;
     }
 
@@ -255,33 +203,6 @@ public class FilmDbStorage implements FilmStorage {
         Assert.notNull(entity, "Film must not be null.");
 
         jdbcTemplate.update("DELETE FROM film WHERE id = ?", entity.getId());
-    }
-
-    @Override
-    public Iterable<FilmMpaRating> findMpaRatingsAll() {
-        return jdbcTemplate.query(
-                "SELECT film_mpa_rating.* FROM film_mpa_rating",
-                new MpaRatingMapper()
-        );
-    }
-
-    @Override
-    public Optional<FilmMpaRating> findMpaRatingById(Long aLong) {
-        Assert.notNull(aLong, "Rating id must not be null.");
-
-        FilmMpaRating genre = null;
-
-        try {
-            genre = jdbcTemplate.queryForObject(
-                    "SELECT film_mpa_rating.* FROM film_mpa_rating WHERE film_mpa_rating.id = ?",
-                    new MpaRatingMapper(),
-                    aLong
-            );
-        } catch (EmptyResultDataAccessException ignored) {
-
-        }
-
-        return genre != null ? Optional.of(genre) : Optional.empty();
     }
 
     @Override

@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.filmgenre.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
@@ -14,6 +16,9 @@ import java.util.Optional;
 @Service
 public class FilmService {
     final private FilmStorage filmStorage;
+    final private MpaRatingStorage mpaRatingStorage;
+
+    final private FilmGenreStorage filmGenreStorage;
 
     final private UserStorage userStorage;
 
@@ -22,10 +27,14 @@ public class FilmService {
     @Autowired
     public FilmService(
             FilmStorage filmStorage,
+            MpaRatingStorage mpaRatingStorage,
+            FilmGenreStorage filmGenreStorage,
             UserStorage userStorage,
             GenreStorage genreStorage
     ) {
         this.filmStorage = filmStorage;
+        this.mpaRatingStorage = mpaRatingStorage;
+        this.filmGenreStorage = filmGenreStorage;
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
     }
@@ -36,6 +45,8 @@ public class FilmService {
 
     public Film save(Film film) {
         Film newFilm = filmStorage.saveFilm(film);
+        filmGenreStorage.deleteAllGenresOfTheFilm(film);
+        filmGenreStorage.saveGenresOfTheFilm(film);
 
         return getById(newFilm.getId());
     }
@@ -87,10 +98,10 @@ public class FilmService {
     }
 
     public FilmMpaRating findRatingById(Long aLong) {
-        return filmStorage.findMpaRatingById(aLong).orElseThrow(() -> new EntityIsNotFoundException(FilmMpaRating.class, aLong));
+        return mpaRatingStorage.findById(aLong).orElseThrow(() -> new EntityIsNotFoundException(FilmMpaRating.class, aLong));
     }
 
     public Iterable<FilmMpaRating> findAllRatings() {
-        return filmStorage.findMpaRatingsAll();
+        return mpaRatingStorage.findAll();
     }
 }

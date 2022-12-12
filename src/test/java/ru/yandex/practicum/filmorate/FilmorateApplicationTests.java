@@ -8,6 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.filmgenre.FilmGenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
@@ -27,6 +29,8 @@ class FilmorateApplicationTests {
     private final FilmDbStorage filmDbStorage;
 
     private final UserDbStorage userDbStorage;
+
+    final private FilmGenreDbStorage filmGenreDbStorage;
 
     @Test
     @Order(1)
@@ -53,6 +57,8 @@ class FilmorateApplicationTests {
                         )
                 )
         );
+        filmGenreDbStorage.deleteAllGenresOfTheFilm(film);
+        filmGenreDbStorage.saveGenresOfTheFilm(film);
 
         assertThat(film).isNotNull();
 
@@ -92,6 +98,8 @@ class FilmorateApplicationTests {
                         )
                 )
         );
+        filmGenreDbStorage.deleteAllGenresOfTheFilm(film);
+        filmGenreDbStorage.saveGenresOfTheFilm(film);
 
         assertThat(film).isNotNull();
 
@@ -129,6 +137,8 @@ class FilmorateApplicationTests {
                         Set.of()
                 )
         );
+        filmGenreDbStorage.deleteAllGenresOfTheFilm(film);
+        filmGenreDbStorage.saveGenresOfTheFilm(film);
 
         assertThat(film).isNotNull();
 
