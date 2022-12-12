@@ -16,8 +16,6 @@ public interface UserStorage {
 
     void deleteById(Long aLong);
 
-    void delete(User entity);
-
     Iterable<UserFriend> findUserFriendAll();
 
     Iterable<User> findFriendsOfUser(User user);

@@ -199,13 +199,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilm(Film filmEntity) {
-        Assert.notNull(filmEntity, "Film must not be null.");
-
-        jdbcTemplate.update("DELETE FROM film WHERE id = ?", filmEntity.getId());
-    }
-
-    @Override
     public FilmLike saveFilmLike(FilmLike filmLikeEntity) {
         Assert.notNull(filmLikeEntity, "Entity must not be null.");
         Assert.notNull(filmLikeEntity.getFilm().getId(), "Film id must not be null.");

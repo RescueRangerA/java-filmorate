@@ -159,13 +159,6 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void delete(User userEntity) {
-        Assert.notNull(userEntity, "User must not be null.");
-
-        jdbcTemplate.update("DELETE FROM account WHERE id = ?", userEntity.getId());
-    }
-
-    @Override
     public Iterable<UserFriend> findUserFriendAll() {
         return jdbcTemplate.query(
                 "SELECT user_from.*, user_to.* FROM account_friendship " +

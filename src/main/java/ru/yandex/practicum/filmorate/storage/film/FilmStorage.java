@@ -16,8 +16,6 @@ public interface FilmStorage {
 
     void deleteFilmById(Long aLong);
 
-    void deleteFilm(Film entity);
-
     FilmLike saveFilmLike(FilmLike entity);
 
     void deleteFilmLike(FilmLike entity);
