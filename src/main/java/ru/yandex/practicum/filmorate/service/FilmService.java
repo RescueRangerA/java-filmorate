@@ -43,7 +43,15 @@ public class FilmService {
         return filmStorage.findFilmsAll();
     }
 
-    public Film save(Film film) {
+    public Film create(Film film) {
+        Film newFilm = filmStorage.saveFilm(film);
+        filmGenreStorage.deleteAllGenresOfTheFilm(film);
+        filmGenreStorage.saveGenresOfTheFilm(film);
+
+        return getById(newFilm.getId());
+    }
+
+    public Film update(Film film) {
         Film newFilm = filmStorage.saveFilm(film);
         filmGenreStorage.deleteAllGenresOfTheFilm(film);
         filmGenreStorage.saveGenresOfTheFilm(film);

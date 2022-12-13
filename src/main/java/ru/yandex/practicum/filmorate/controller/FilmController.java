@@ -26,9 +26,14 @@ public class FilmController {
         return filmService.findAll();
     }
 
-    @RequestMapping(method = {RequestMethod.PUT, RequestMethod.POST})
-    public Film createOrUpdate(@Valid @RequestBody Film film) {
-        return filmService.save(film);
+    @PostMapping
+    public Film createFilm(@Valid @RequestBody Film film) {
+        return filmService.create(film);
+    }
+
+    @PutMapping
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        return filmService.update(film);
     }
 
     @GetMapping("/{filmId}")

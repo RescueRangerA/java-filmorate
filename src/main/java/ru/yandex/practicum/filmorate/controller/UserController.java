@@ -26,9 +26,14 @@ public class UserController {
         return userService.getAll();
     }
 
-    @RequestMapping(method = {RequestMethod.PUT, RequestMethod.POST})
-    public User createOrUpdate(@Valid @RequestBody User user) {
-        return userService.save(user);
+    @PostMapping
+    public User createUser(@Valid @RequestBody User user) {
+        return userService.create(user);
+    }
+
+    @PutMapping
+    public User updateUser(@Valid @RequestBody User user) {
+        return userService.update(user);
     }
 
     @GetMapping("/{userId}")

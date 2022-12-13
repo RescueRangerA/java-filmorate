@@ -23,7 +23,11 @@ public class UserService {
         return userStorage.findAll();
     }
 
-    public User save(User user) {
+    public User create(User user) {
+        return userStorage.save(user);
+    }
+
+    public User update(User user) {
         return userStorage.save(user);
     }
 
