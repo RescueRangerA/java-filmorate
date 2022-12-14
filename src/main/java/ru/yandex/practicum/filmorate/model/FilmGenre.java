@@ -1,6 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.validation.constraints.Positive;
 
@@ -8,10 +11,10 @@ import javax.validation.constraints.Positive;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FilmLike {
+public class FilmGenre {
     @Positive
     private Film film;
 
     @Positive
-    private User user;
+    private Genre genre;
 }

@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
-import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.Positive;
 
@@ -9,14 +8,10 @@ import javax.validation.constraints.Positive;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserFriend implements Entity {
+public class UserFriend {
     @Positive
-    @Nullable
-    private Long id;
+    private User fromUser;
 
     @Positive
-    private Long userIdA;
-
-    @Positive
-    private Long userIdB;
+    private User toUser;
 }

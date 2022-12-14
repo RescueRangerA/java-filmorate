@@ -7,9 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
-import ru.yandex.practicum.filmorate.storage.EntityAlreadyExistsException;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
-import ru.yandex.practicum.filmorate.storage.userfriend.FriendOfHisOwnException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,18 +24,6 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler
     public void handleValidationException(final ValidationException e, HttpServletResponse response) throws IOException {
-        logIfNeeded(e);
-        response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-    }
-
-    @ExceptionHandler
-    public void handleValidationException(final EntityAlreadyExistsException e, HttpServletResponse response) throws IOException {
-        logIfNeeded(e);
-        response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-    }
-
-    @ExceptionHandler
-    public void handleValidationException(final FriendOfHisOwnException e, HttpServletResponse response) throws IOException {
         logIfNeeded(e);
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
     }

@@ -1,20 +1,25 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
+import ru.yandex.practicum.filmorate.model.FilmLike;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FilmStorage {
-    List<Film> getAll();
+    List<Film> findFilmsAll();
 
-    List<Film> getFirstN(Integer limit);
+    Film saveFilm(Film entity);
 
-    Film get(Long filmId) throws EntityIsNotFoundException;
+    Optional<Film> findFilmById(Long aLong);
 
-    List<Film> getMany(List<Long> filmIds);
+    List<Film> findFilmsAllById(List<Long> longs);
 
-    Film create(Film filmEntity);
+    void deleteFilmById(Long aLong);
 
-    Film update(Film filmEntity) throws EntityIsNotFoundException;
+    FilmLike saveFilmLike(FilmLike entity);
+
+    void deleteFilmLike(FilmLike entity);
+
+    List<Film> findTopNMostLikedFilms(Integer limit);
 }
