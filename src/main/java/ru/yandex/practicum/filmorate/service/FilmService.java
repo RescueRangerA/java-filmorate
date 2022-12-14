@@ -10,8 +10,7 @@ import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class FilmService {
@@ -94,7 +93,21 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer limit) {
-        return filmStorage.findTopNMostLikedFilms(limit);
+        List<FilmGenre> filmGenres = filmGenreStorage.findFilmGenresOfTheFilms(filmStorage.findTopNMostLikedFilms(limit));
+
+        Map<Long, Film> films = new HashMap<>();
+        for (FilmGenre filmGenre : filmGenres) {
+            Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
+
+            Genre genre = filmGenre.getGenre();
+            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
+                film.addGenre(genre);
+            }
+
+            films.put(film.getId(), film);
+        }
+
+        return new ArrayList<>(films.values());
     }
 
     public Genre findGenreById(Long aLong) {
