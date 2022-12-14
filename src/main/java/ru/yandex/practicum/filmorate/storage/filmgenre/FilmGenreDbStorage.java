@@ -6,13 +6,7 @@ import org.springframework.util.Assert;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Comparator;
-import java.util.Set;
-import java.util.TreeSet;
 
 @Component
 public class FilmGenreDbStorage implements FilmGenreStorage {
@@ -25,38 +19,19 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     @Override
     public Film saveGenresOfTheFilm(Film filmEntity) {
         if (filmEntity.getGenres().size() > 0) {
-            Set<Genre> genres = new TreeSet<>(Comparator.comparingLong(Genre::getId));
-            genres.addAll(filmEntity.getGenres());
-            filmEntity.setGenres(genres);
+            Assert.notNull(filmEntity.getId(), "Film id must not be null.");
 
-            try {
-                DataSource ds = jdbcTemplate.getDataSource();
-                Assert.notNull(ds);
-                Connection connection = ds.getConnection();
-                connection.setAutoCommit(false);
+            jdbcTemplate.batchUpdate(
+                    "INSERT INTO film_genre (film_id, genre_id) VALUES (?,?)",
+                    filmEntity.getGenres(),
+                    100,
+                    (PreparedStatement ps, Genre genre) -> {
+                        Assert.notNull(genre.getId(), "Genre id must not be null.");
 
-                PreparedStatement ps = connection.prepareStatement(
-                        "INSERT INTO film_genre (film_id, genre_id) VALUES (?,?)"
-                );
-
-                for (Genre genre : filmEntity.getGenres()) {
-                    if (filmEntity.getId() == null || genre.getId() == null) {
-                        continue;
+                        ps.setLong(1, filmEntity.getId());
+                        ps.setLong(2, genre.getId());
                     }
-
-                    ps.setLong(1, filmEntity.getId());
-                    ps.setLong(2, genre.getId());
-                    ps.addBatch();
-                }
-
-                ps.executeBatch();
-                ps.clearBatch();
-                connection.commit();
-                ps.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-
+            );
         }
 
         return filmEntity;
