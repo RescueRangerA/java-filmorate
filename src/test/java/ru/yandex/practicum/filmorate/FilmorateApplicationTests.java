@@ -9,11 +9,11 @@ import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.filmgenre.FilmGenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -51,9 +51,10 @@ class FilmorateApplicationTests {
                         LocalDate.parse("1967-03-25", DateTimeFormatter.ISO_DATE),
                         100,
                         new FilmMpaRating(1L, null, null),
-                        Set.of(
-                                new Genre(1L, null),
-                                new Genre(2L, null)
+                        new LinkedHashSet(
+                                Set.of(
+                                        new Genre(1L, null),
+                                        new Genre(2L, null))
                         )
                 )
         );
@@ -93,8 +94,10 @@ class FilmorateApplicationTests {
                         LocalDate.parse("1989-04-17", DateTimeFormatter.ISO_DATE),
                         190,
                         new FilmMpaRating(2L, null, null),
-                        Set.of(
-                                new Genre(3L, null)
+                        new LinkedHashSet(
+                                Set.of(
+                                        new Genre(1L, null)
+                                )
                         )
                 )
         );
@@ -134,7 +137,7 @@ class FilmorateApplicationTests {
                         LocalDate.parse("1989-04-17", DateTimeFormatter.ISO_DATE),
                         190,
                         new FilmMpaRating(2L, null, null),
-                        Set.of()
+                        new LinkedHashSet<>()
                 )
         );
         filmGenreDbStorage.deleteAllGenresOfTheFilm(film);
