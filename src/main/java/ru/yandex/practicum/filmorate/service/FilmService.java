@@ -125,4 +125,19 @@ public class FilmService {
     public List<FilmMpaRating> findAllRatings() {
         return mpaRatingStorage.findAll();
     }
+
+    public List<Film> getSearch(String query, String by) {
+        List<Film> films = new ArrayList<>();
+        if(!query.isBlank() && !by.isBlank()){
+            String [] param = by.split(",");
+            if(param.length == 2){
+                films = filmStorage.searchByFilmAndDirector(query);
+            } else if(param.length == 1 && param[0] == "title"){
+                films = filmStorage.searchByFilm(query);
+            } else {
+                films = filmStorage.searchByDirector(query);
+            }
+        }
+        return films;
+    }
 }

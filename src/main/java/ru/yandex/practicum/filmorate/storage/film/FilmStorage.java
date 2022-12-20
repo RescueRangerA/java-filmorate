@@ -22,4 +22,10 @@ public interface FilmStorage {
     void deleteFilmLike(FilmLike entity);
 
     List<Film> findTopNMostLikedFilms(Integer limit);
+
+    List<Film> searchByFilm(String query);
+
+    List<Film> searchByDirector(String query);
+
+    List<Film> searchByFilmAndDirector(String query);
 }

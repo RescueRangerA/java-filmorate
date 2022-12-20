@@ -58,20 +58,7 @@ public class FilmDbStorage implements FilmStorage {
                 new FilmGenreMapper()
         );
 
-
-        Map<Long, Film> films = new HashMap<>();
-        for (FilmGenre filmGenre : filmsWithGenres) {
-            Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
-
-            Genre genre = filmGenre.getGenre();
-            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
-                film.addGenre(genre);
-            }
-
-            films.put(film.getId(), film);
-        }
-
-        return new LinkedList<>(films.values());
+        return addGenres(filmsWithGenres);
     }
 
     @Override
@@ -170,20 +157,7 @@ public class FilmDbStorage implements FilmStorage {
                 filmIds.toArray()
         );
 
-
-        Map<Long, Film> films = new HashMap<>();
-        for (FilmGenre filmGenre : filmsWithGenres) {
-            Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
-
-            Genre genre = filmGenre.getGenre();
-            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
-                film.addGenre(genre);
-            }
-
-            films.put(film.getId(), film);
-        }
-
-        return new LinkedList<>(films.values());
+        return addGenres(filmsWithGenres);
     }
 
     @Override
@@ -240,5 +214,57 @@ public class FilmDbStorage implements FilmStorage {
                 new FilmDbStorage.FilmMapper(),
                 limit
         );
+    }
+
+    @Override
+    public List<Film> searchByFilm(String query) {
+        List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
+                        "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                        "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                        "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                        "WHERE LOWER(\"title\".\"description\") LIKE ?",
+                new FilmGenreMapper(), query
+        );
+        return addGenres(filmsWithGenres);
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
+                        "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                        "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                        "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                        "WHERE LOWER(\"name\") LIKE ?",
+                new FilmGenreMapper(), query
+        );
+        return addGenres(filmsWithGenres);
+    }
+
+    @Override
+    public List<Film> searchByFilmAndDirector(String query) {
+        List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
+                        "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                        "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                        "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                        "WHERE LOWER(\"name\") LIKE ?",
+                new FilmGenreMapper(), query
+        );
+        return addGenres(filmsWithGenres);
+    }
+
+    private List<Film> addGenres(List<FilmGenre> filmsWithGenres) {
+        Map<Long, Film> films = new HashMap<>();
+        for (FilmGenre filmGenre : filmsWithGenres) {
+            Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
+            Genre genre = filmGenre.getGenre();
+            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
+                film.addGenre(genre);
+            }
+            films.put(film.getId(), film);
+        }
+        return new LinkedList<>(films.values());
     }
 }
