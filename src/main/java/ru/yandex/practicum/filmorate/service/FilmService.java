@@ -125,4 +125,8 @@ public class FilmService {
     public List<FilmMpaRating> findAllRatings() {
         return mpaRatingStorage.findAll();
     }
+
+    public void removefilm(Long filmId) {
+        filmStorage.deleteFilmById(filmId);
+    }
 }
