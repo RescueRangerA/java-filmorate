@@ -27,5 +27,5 @@ public interface FilmStorage {
 
     List<Film> searchByDirector(String query);
 
-    List<Film> searchByFilmAndDirector(String query);
+    List<Film> searchByFilmAndDirector(String param1, String param2);
 }
