@@ -27,6 +27,8 @@ public class FilmService {
 
     final private FilmDirectorStorage filmDirectorStorage;
 
+    final private DirectorService directorService;
+
     @Autowired
     public FilmService(
             FilmStorage filmStorage,
@@ -34,8 +36,8 @@ public class FilmService {
             FilmGenreStorage filmGenreStorage,
             UserStorage userStorage,
             GenreStorage genreStorage,
-            FilmDirectorStorage filmDirectorStorage
-
+            FilmDirectorStorage filmDirectorStorage,
+            DirectorService directorService
     ) {
         this.filmStorage = filmStorage;
         this.mpaRatingStorage = mpaRatingStorage;
@@ -43,6 +45,7 @@ public class FilmService {
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
         this.filmDirectorStorage = filmDirectorStorage;
+        this.directorService = directorService;
     }
 
     public List<Film> findAll() {
@@ -134,5 +137,11 @@ public class FilmService {
 
     public List<FilmMpaRating> findAllRatings() {
         return mpaRatingStorage.findAll();
+    }
+
+    public List<Film> getFilmByDirector(final Long directorId, final String sortBy) {
+        directorService.findbyId(directorId);
+
+        return  filmStorage.getFilmByDirector(directorId, sortBy.toLowerCase());
     }
 }

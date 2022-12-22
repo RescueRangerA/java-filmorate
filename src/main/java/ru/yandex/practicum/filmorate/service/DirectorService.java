@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DirectorService {

@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingDbStorage;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class FilmDbStorage implements FilmStorage {
@@ -41,8 +42,6 @@ public class FilmDbStorage implements FilmStorage {
                     new GenreDbStorage.GenreMapper().mapRow(rs, rowNum),
                     new DirectorDbStorage.DirectorMapper().mapRow(rs, rowNum)
             );
-            System.out.println("b "+filmGenre.getDirector().getId());
-            System.out.println("a "+rowNum);
             return filmGenre;
         }
     }
@@ -192,7 +191,8 @@ public class FilmDbStorage implements FilmStorage {
         );
 
 
-        Map<Long, Film> films = new HashMap<>();
+        Map<Long, Film> films = new LinkedHashMap<>();
+
         for (FilmGenre filmGenre : filmsWithGenres) {
             Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
 
@@ -266,5 +266,53 @@ public class FilmDbStorage implements FilmStorage {
                 new FilmDbStorage.FilmMapper(),
                 limit
         );
+    }
+
+    public List<Film> getFilmByDirector(final Long directorId, final String sortBy) {
+        Assert.notNull(directorId, "Director id must not be null.");
+
+        String sqlQuery = "";
+        if(sortBy.equals("year")) {
+            sqlQuery = "SELECT film.*,  film_mpa_rating.*, genre.*, director.* FROM film " +
+                    "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                    "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                    "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                    "LEFT JOIN film_director ON film_director.film_id = film.id " +
+                    "LEFT JOIN director ON film_director.director_id = director.id " +
+                    "WHERE director.id = ?" +
+                    "ORDER BY extract(year from CAST(release_date as DATE))";
+        } else if(sortBy.equals("like")) {
+            sqlQuery = "";
+        }
+
+        final List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+                sqlQuery,
+                new FilmGenreMapper(),
+                directorId
+        );
+
+        return makeFilmWithAllFields(filmsWithGenres);
+    }
+
+    private List<Film> makeFilmWithAllFields(List<FilmGenre> filmsWithGenres){
+        List<Film> films = new ArrayList<>();
+
+        for (FilmGenre filmGenre : filmsWithGenres) {
+            Film film = filmGenre.getFilm();
+
+            Genre genre = filmGenre.getGenre();
+            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
+                film.addGenre(genre);
+            }
+
+            final Director director = filmGenre.getDirector();
+            if (director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
+            }
+
+            films.add(film);
+        }
+
+        return films;
     }
 }
