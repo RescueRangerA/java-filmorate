@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmGenre;
+import ru.yandex.practicum.filmorate.model.FilmGenreDirector;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 
@@ -53,7 +54,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     }
 
     @Override
-    public List<FilmGenre> findFilmGenresOfTheFilms(List<Film> filmEntities) {
+    public List<FilmGenreDirector> findFilmGenresOfTheFilms(List<Film> filmEntities) {
         List<Long> filmIds = filmEntities.stream().map(Film::getId).collect(Collectors.toList());
         String inSql = String.join(",", Collections.nCopies(filmIds.size(), "?"));
         return jdbcTemplate.query(
@@ -65,7 +66,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
                                 "LEFT JOIN film_director ON film_director.film_id = film.id " +
                                 "LEFT JOIN director ON film_director.director_id = director.id " +
                                 "WHERE film.id IN (%s)", inSql),
-                new FilmDbStorage.FilmGenreMapper(),
+                new FilmDbStorage.FilmGenreDirectorMapper(),
                 filmIds.toArray()
         );
     }

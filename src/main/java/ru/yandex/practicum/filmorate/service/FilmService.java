@@ -106,15 +106,20 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer limit) {
-        List<FilmGenre> filmGenres = filmGenreStorage.findFilmGenresOfTheFilms(filmStorage.findTopNMostLikedFilms(limit));
+        List<FilmGenreDirector> filmGenres = filmGenreStorage.findFilmGenresOfTheFilms(filmStorage.findTopNMostLikedFilms(limit));
 
         Map<Long, Film> films = new HashMap<>();
-        for (FilmGenre filmGenre : filmGenres) {
+        for (FilmGenreDirector filmGenre : filmGenres) {
             Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
 
             Genre genre = filmGenre.getGenre();
             if (genre != null && genre.getId() != null && genre.getId() != 0L) {
                 film.addGenre(genre);
+            }
+
+            final Director director = filmGenre.getDirector();
+            if(director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
             }
 
             films.put(film.getId(), film);
