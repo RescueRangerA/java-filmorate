@@ -22,4 +22,6 @@ public interface FilmStorage {
     void deleteFilmLike(FilmLike entity);
 
     List<Film> findTopNMostLikedFilms(Integer limit);
+
+    List<Film> getFilmsFriends(Long userId, Long friendId);
 }

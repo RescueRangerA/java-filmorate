@@ -125,4 +125,34 @@ public class FilmService {
     public List<FilmMpaRating> findAllRatings() {
         return mpaRatingStorage.findAll();
     }
+
+    public List<Film> getFilmsFriends(Long userId, Long friendId) {
+
+        Optional<User> userA = userStorage.findById(userId);
+        Optional<User> userB = userStorage.findById(friendId);
+
+        if (userA.isEmpty()) {
+            throw new EntityIsNotFoundException(User.class, userId);
+        }
+
+        if (userB.isEmpty()) {
+            throw new EntityIsNotFoundException(User.class, friendId);
+        }
+
+        List<FilmGenre> filmGenres = filmGenreStorage.findFilmGenresOfTheFilms(filmStorage.getFilmsFriends(userId, friendId));
+
+        Map<Long, Film> films = new HashMap<>();
+        for (FilmGenre filmGenre : filmGenres) {
+            Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
+
+            Genre genre = filmGenre.getGenre();
+            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
+                film.addGenre(genre);
+            }
+
+            films.put(film.getId(), film);
+        }
+
+        return new ArrayList<>(films.values());
+    }
 }
