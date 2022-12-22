@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.filmdirector.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.filmgenre.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingStorage;
@@ -23,19 +25,24 @@ public class FilmService {
 
     final private GenreStorage genreStorage;
 
+    final private FilmDirectorStorage filmDirectorStorage;
+
     @Autowired
     public FilmService(
             FilmStorage filmStorage,
             MpaRatingStorage mpaRatingStorage,
             FilmGenreStorage filmGenreStorage,
             UserStorage userStorage,
-            GenreStorage genreStorage
+            GenreStorage genreStorage,
+            FilmDirectorStorage filmDirectorStorage
+
     ) {
         this.filmStorage = filmStorage;
         this.mpaRatingStorage = mpaRatingStorage;
         this.filmGenreStorage = filmGenreStorage;
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
+        this.filmDirectorStorage = filmDirectorStorage;
     }
 
     public List<Film> findAll() {
@@ -46,6 +53,7 @@ public class FilmService {
         Film newFilm = filmStorage.saveFilm(film);
         filmGenreStorage.deleteAllGenresOfTheFilm(film);
         filmGenreStorage.saveGenresOfTheFilm(film);
+        filmDirectorStorage.saveDirectorsOfTheFilm(film);
 
         return getById(newFilm.getId());
     }
@@ -54,6 +62,8 @@ public class FilmService {
         Film newFilm = filmStorage.saveFilm(film);
         filmGenreStorage.deleteAllGenresOfTheFilm(film);
         filmGenreStorage.saveGenresOfTheFilm(film);
+        filmDirectorStorage.deleteDirectorsFromFilm(film);
+        filmDirectorStorage.saveDirectorsOfTheFilm(film);
 
         return getById(newFilm.getId());
     }
