@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.director;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -22,13 +23,14 @@ public class DirectorDbStorage implements DirectorStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public static Director DirectorMapper(final ResultSet rs, final int rowNum) {
-        try {
+    public static class DirectorMapper implements RowMapper<Director> {
+
+        @Override
+        public Director mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
             return new Director(
-                    rs.getInt("id"),
-                    rs.getString("name"));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+                    rs.getLong("director.id"),
+                    rs.getString("director.name"));
         }
     }
 
@@ -38,7 +40,7 @@ public class DirectorDbStorage implements DirectorStorage {
 
         return jdbcTemplate.query(
                 sqlQuery,
-                DirectorDbStorage::DirectorMapper
+                new DirectorMapper()
         );
     }
 
@@ -50,7 +52,7 @@ public class DirectorDbStorage implements DirectorStorage {
         try {
             director = jdbcTemplate.queryForObject(
                     sqlQuery,
-                    DirectorDbStorage::DirectorMapper,
+                    new DirectorMapper(),
                     directorId
             );
         } catch (EmptyResultDataAccessException e) {

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingDbStorage;
 
@@ -35,10 +36,14 @@ public class FilmDbStorage implements FilmStorage {
     public static class FilmGenreMapper implements RowMapper<FilmGenre> {
         @Override
         public FilmGenre mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return new FilmGenre(
+            FilmGenre filmGenre = new FilmGenre(
                     new FilmMapper().mapRow(rs, rowNum),
-                    new GenreDbStorage.GenreMapper().mapRow(rs, rowNum)
+                    new GenreDbStorage.GenreMapper().mapRow(rs, rowNum),
+                    new DirectorDbStorage.DirectorMapper().mapRow(rs, rowNum)
             );
+            System.out.println("b "+filmGenre.getDirector().getId());
+            System.out.println("a "+rowNum);
+            return filmGenre;
         }
     }
 
@@ -51,10 +56,12 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> findFilmsAll() {
         List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
-                "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
+                "SELECT film.*, film_mpa_rating.*, genre.*, director.* FROM film " +
                         "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
                         "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
-                        "LEFT JOIN genre ON genre.id = film_genre.genre_id ",
+                        "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                        "LEFT JOIN film_director ON film_director.film_id = film.id " +
+                        "LEFT JOIN director ON film_director.director_id = director.id",
                 new FilmGenreMapper()
         );
 
@@ -66,6 +73,11 @@ public class FilmDbStorage implements FilmStorage {
             Genre genre = filmGenre.getGenre();
             if (genre != null && genre.getId() != null && genre.getId() != 0L) {
                 film.addGenre(genre);
+            }
+
+            final Director director = filmGenre.getDirector();
+            if(director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
             }
 
             films.put(film.getId(), film);
@@ -128,10 +140,12 @@ public class FilmDbStorage implements FilmStorage {
         Assert.notNull(filmId, "Film id must not be null.");
 
         List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
-                "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
+                "SELECT film.*, film_mpa_rating.*, genre.*, director.* FROM film " +
                         "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
                         "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
                         "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                        "LEFT JOIN film_director ON film_director.film_id = film.id " +
+                        "LEFT JOIN director ON film_director.director_id = director.id " +
                         "WHERE film.id = ?",
                 new FilmGenreMapper(),
                 filmId
@@ -148,6 +162,11 @@ public class FilmDbStorage implements FilmStorage {
             if (genre != null && genre.getId() != null && genre.getId() != 0L) {
                 film.addGenre(genre);
             }
+
+            final Director director = filmGenre.getDirector();
+            if (director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
+            }
         }
 
         return film != null ? Optional.of(film) : Optional.empty();
@@ -161,10 +180,12 @@ public class FilmDbStorage implements FilmStorage {
 
         List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
                 String.format(
-                        "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
+                        "SELECT film.*, film_mpa_rating.*, genre.*, director.* FROM film " +
                                 "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
                                 "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
                                 "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                                "LEFT JOIN film_director ON film_director.film_id = film.id " +
+                                "LEFT JOIN director ON film_director.director_id = director.id " +
                                 "WHERE film.id IN (%s)", inSql),
                 new FilmGenreMapper(),
                 filmIds.toArray()
@@ -178,6 +199,11 @@ public class FilmDbStorage implements FilmStorage {
             Genre genre = filmGenre.getGenre();
             if (genre != null && genre.getId() != null && genre.getId() != 0L) {
                 film.addGenre(genre);
+            }
+
+            final Director director = filmGenre.getDirector();
+            if (director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
             }
 
             films.put(film.getId(), film);

@@ -17,4 +17,7 @@ public class FilmGenre {
 
     @Positive
     private Genre genre;
+
+    @Positive
+    private Director director;
 }

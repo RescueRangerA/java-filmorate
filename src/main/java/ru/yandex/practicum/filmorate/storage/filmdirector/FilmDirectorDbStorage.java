@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.sql.PreparedStatement;
-import java.util.stream.Collectors;
 
 @Component
 public class FilmDirectorDbStorage implements FilmDirectorStorage {
@@ -22,11 +21,13 @@ public class FilmDirectorDbStorage implements FilmDirectorStorage {
     @Override
     public Film saveDirectorsOfTheFilm(Film film) {
         final String sqlQuery = "INSERT INTO film_director(film_id, director_id) VALUES (?,?)";
-        if(film.getDirectors().isEmpty()) return film;
+
+        if(film.getDirectors().size() == 0) return film;
+
         jdbcTemplate.batchUpdate(
                 sqlQuery,
                 film.getDirectors(),
-                20,
+                100,
                 (PreparedStatement ps, Director director) -> {
                     ps.setLong(1, film.getId());
                     ps.setLong(2, director.getId());

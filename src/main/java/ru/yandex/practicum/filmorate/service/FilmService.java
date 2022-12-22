@@ -62,8 +62,8 @@ public class FilmService {
         Film newFilm = filmStorage.saveFilm(film);
         filmGenreStorage.deleteAllGenresOfTheFilm(film);
         filmGenreStorage.saveGenresOfTheFilm(film);
-        filmDirectorStorage.deleteDirectorsFromFilm(film);
-        filmDirectorStorage.saveDirectorsOfTheFilm(film);
+        filmDirectorStorage.deleteDirectorsFromFilm(newFilm);
+        filmDirectorStorage.saveDirectorsOfTheFilm(newFilm);
 
         return getById(newFilm.getId());
     }

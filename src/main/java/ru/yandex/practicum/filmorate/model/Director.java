@@ -17,7 +17,7 @@ public class Director {
 
     @Positive
     @Nullable
-    private long id;
+    private Long id;
 
     @NotBlank
     private String name;

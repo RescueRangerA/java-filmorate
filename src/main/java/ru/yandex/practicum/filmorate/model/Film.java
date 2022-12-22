@@ -42,7 +42,14 @@ public class Film {
 
     private List<Director> directors = new ArrayList<>();
 
-    public Film(@Nullable Long id, String name, String description, LocalDate releaseDate, Integer duration, FilmMpaRating mpa) {
+    public Film(
+            @Nullable Long id,
+            String name,
+            String description,
+            LocalDate releaseDate,
+            Integer duration,
+            FilmMpaRating mpa
+    ) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -79,7 +86,4 @@ public class Film {
                 .collect(Collectors.toList());
     }
 
-    public List<Director> getDirectors() {
-        return directors.stream().collect(Collectors.toList());
-    }
 }
