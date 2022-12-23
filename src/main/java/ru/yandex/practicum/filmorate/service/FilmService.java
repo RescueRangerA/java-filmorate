@@ -156,10 +156,10 @@ public class FilmService {
             throw new EntityIsNotFoundException(User.class, friendId);
         }
 
-        List<FilmGenre> filmGenres = filmGenreStorage.findFilmGenresOfTheFilms(filmStorage.getFilmsFriends(userId, friendId));
+        List<FilmGenreDirector> filmGenres = filmGenreStorage.findFilmGenresOfTheFilms(filmStorage.getFilmsFriends(userId, friendId));
 
         Map<Long, Film> films = new HashMap<>();
-        for (FilmGenre filmGenre : filmGenres) {
+        for (FilmGenreDirector filmGenre : filmGenres) {
             Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
 
             Genre genre = filmGenre.getGenre();
