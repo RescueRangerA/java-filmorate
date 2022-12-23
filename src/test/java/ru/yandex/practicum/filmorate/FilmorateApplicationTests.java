@@ -8,15 +8,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.filmdirector.FilmDirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.filmgenre.FilmGenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -31,6 +29,8 @@ class FilmorateApplicationTests {
     private final UserDbStorage userDbStorage;
 
     final private FilmGenreDbStorage filmGenreDbStorage;
+
+    final private FilmDirectorDbStorage filmDirectorDbStorage;
 
     @Test
     @Order(1)
@@ -55,11 +55,14 @@ class FilmorateApplicationTests {
                                 Set.of(
                                         new Genre(1L, null),
                                         new Genre(2L, null))
-                        )
+                        ),
+                        new ArrayList<>()
                 )
         );
         filmGenreDbStorage.deleteAllGenresOfTheFilm(film);
         filmGenreDbStorage.saveGenresOfTheFilm(film);
+        filmDirectorDbStorage.deleteDirectorsFromFilm(film);
+        filmDirectorDbStorage.saveDirectorsOfTheFilm(film);
 
         assertThat(film).isNotNull();
 
@@ -80,6 +83,9 @@ class FilmorateApplicationTests {
                 ).hasValueSatisfying(filmObj ->
                         assertThat(filmObj.getGenres())
                                 .hasSize(2)
+                ).hasValueSatisfying(filmObj ->
+                        assertThat(filmObj.getDirectors())
+                                .hasSize(0)
                 );
     }
 
@@ -98,11 +104,14 @@ class FilmorateApplicationTests {
                                 Set.of(
                                         new Genre(1L, null)
                                 )
-                        )
+                        ),
+                        new ArrayList<>()
                 )
         );
         filmGenreDbStorage.deleteAllGenresOfTheFilm(film);
         filmGenreDbStorage.saveGenresOfTheFilm(film);
+        filmDirectorDbStorage.deleteDirectorsFromFilm(film);
+        filmDirectorDbStorage.saveDirectorsOfTheFilm(film);
 
         assertThat(film).isNotNull();
 
@@ -123,6 +132,9 @@ class FilmorateApplicationTests {
                 ).hasValueSatisfying(filmObj ->
                         assertThat(filmObj.getGenres())
                                 .hasSize(1)
+                ).hasValueSatisfying(filmObj ->
+                        assertThat(filmObj.getDirectors())
+                                .hasSize(0)
                 );
     }
 
@@ -137,11 +149,14 @@ class FilmorateApplicationTests {
                         LocalDate.parse("1989-04-17", DateTimeFormatter.ISO_DATE),
                         190,
                         new FilmMpaRating(2L, null, null),
-                        new LinkedHashSet<>()
+                        new LinkedHashSet<>(),
+                        new ArrayList<>()
                 )
         );
         filmGenreDbStorage.deleteAllGenresOfTheFilm(film);
         filmGenreDbStorage.saveGenresOfTheFilm(film);
+        filmDirectorDbStorage.deleteDirectorsFromFilm(film);
+        filmDirectorDbStorage.saveDirectorsOfTheFilm(film);
 
         assertThat(film).isNotNull();
 
