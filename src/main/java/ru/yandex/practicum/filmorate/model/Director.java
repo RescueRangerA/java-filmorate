@@ -4,18 +4,21 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FilmGenre {
-    @Positive
-    private Film film;
+public class Director {
 
     @Positive
-    private Genre genre;
+    @Nullable
+    private Long id;
 
+    @NotBlank
+    private String name;
 }

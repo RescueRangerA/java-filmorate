@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmGenre;
+import ru.yandex.practicum.filmorate.model.FilmGenreDirector;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 
@@ -53,17 +53,19 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     }
 
     @Override
-    public List<FilmGenre> findFilmGenresOfTheFilms(List<Film> filmEntities) {
+    public List<FilmGenreDirector> findFilmGenresOfTheFilms(List<Film> filmEntities) {
         List<Long> filmIds = filmEntities.stream().map(Film::getId).collect(Collectors.toList());
         String inSql = String.join(",", Collections.nCopies(filmIds.size(), "?"));
         return jdbcTemplate.query(
                 String.format(
-                        "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
+                        "SELECT film.*, film_mpa_rating.*, genre.*, director.* FROM film " +
                                 "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
                                 "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
                                 "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                                "LEFT JOIN film_director ON film_director.film_id = film.id " +
+                                "LEFT JOIN director ON film_director.director_id = director.id " +
                                 "WHERE film.id IN (%s)", inSql),
-                new FilmDbStorage.FilmGenreMapper(),
+                new FilmDbStorage.FilmGenreDirectorMapper(),
                 filmIds.toArray()
         );
     }
