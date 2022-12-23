@@ -300,7 +300,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> searchByFilmAndDirector(String query) {
         List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
                 "SELECT film.*, film_mpa_rating.*, genre.*, director.*, " +
-                    "COUNT(film_like.film_id) " +
+                    "COUNT(film_like.film_id) as likes " +
                     "FROM film " +
                     "LEFT JOIN film_like ON film.id = film_like.film_id " +
                     "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
