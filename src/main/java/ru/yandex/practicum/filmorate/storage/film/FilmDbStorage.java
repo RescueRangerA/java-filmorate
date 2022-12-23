@@ -390,9 +390,6 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
-
-}
-
     @Override
     public List<Film> searchByFilmAndDirector(String query) {
         List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
