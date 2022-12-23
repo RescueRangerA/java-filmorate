@@ -248,7 +248,7 @@ public class FilmDbStorage implements FilmStorage {
                 "LEFT JOIN director ON director.id = film_director.director_id " +
                 "WHERE LOWER(film.title) LIKE ? " +
                 "GROUP BY film_like.film_id, genre.id " +
-                "ORDER BY likes DESK",
+                "ORDER BY likes DESC",
                 new FilmGenreMapper(),
                 "%" + query.toLowerCase() + "%"
         );
@@ -279,7 +279,7 @@ public class FilmDbStorage implements FilmStorage {
                     "LEFT JOIN director ON director.id = film_director.director_id " +
                     "WHERE LOWER(director.name) LIKE ? " +
                     "GROUP BY film_like.film_id, genre.id " +
-                    "ORDER BY likes DESK",
+                    "ORDER BY likes DESC",
                 new FilmGenreMapper(),
                 "%" + query.toLowerCase() + "%"
         );
@@ -300,7 +300,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> searchByFilmAndDirector(String query) {
         List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
                 "SELECT film.*, film_mpa_rating.*, genre.*, director.*, " +
-                    "COUNT(film_like.film_id) as likes " +
+                    "COUNT(film_like.film_id) " +
                     "FROM film " +
                     "LEFT JOIN film_like ON film.id = film_like.film_id " +
                     "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
@@ -310,7 +310,7 @@ public class FilmDbStorage implements FilmStorage {
                     "LEFT JOIN director ON director.id = film_director.director_id " +
                     "WHERE LOWER(film.title) LIKE ? OR LOWER(director.name) LIKE ? " +
                     "GROUP BY film_like.film_id, genre.id " +
-                    "ORDER BY likes DESK",
+                    "ORDER BY likes DESC",
                 new FilmGenreMapper(),
                 "%" + query.toLowerCase() + "%",
                 "%" + query.toLowerCase() + "%"
