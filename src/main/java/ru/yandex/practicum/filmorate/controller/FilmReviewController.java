@@ -65,4 +65,9 @@ public class FilmReviewController {
     public void removeFilmReviewLike(@PathVariable Long filmReviewId, @PathVariable Long userId) {
         filmReviewService.removeLike(filmReviewId, userId);
     }
+
+    @DeleteMapping("/{filmReviewId}/dislike/{userId}")
+    public void removeFilmReviewDisLike(@PathVariable Long filmReviewId, @PathVariable Long userId) {
+        filmReviewService.removeLike(filmReviewId, userId);
+    }
 }

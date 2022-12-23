@@ -101,6 +101,6 @@ public class FilmReviewService {
             throw new EntityIsNotFoundException(User.class, userId);
         }
 
-        filmReviewStorage.deleteFilmReviewLike(new FilmReviewLike(filmReview.get(), user.get(), true));
+        filmReviewStorage.deleteFilmReviewLikeByFilmReviewIdAndUserId(filmReviewId, userId);
     }
 }

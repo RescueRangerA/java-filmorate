@@ -157,15 +157,14 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
     }
 
     @Override
-    public void deleteFilmReviewLike(FilmReviewLike filmReviewLikeEntity) {
-        Assert.notNull(filmReviewLikeEntity, "Film review like entity must not be null.");
-        Assert.notNull(filmReviewLikeEntity.getFilmReview().getReviewId(), "Film review id must not be null.");
-        Assert.notNull(filmReviewLikeEntity.getUser().getId(), "User id must not be null.");
+    public void deleteFilmReviewLikeByFilmReviewIdAndUserId(Long filmReviewId, Long userId) {
+        Assert.notNull(filmReviewId, "Film review id must not be null.");
+        Assert.notNull(userId, "User id must not be null.");
 
         jdbcTemplate.update(
                 "DELETE FROM film_review_like WHERE film_review_id = ? AND user_id = ?",
-                filmReviewLikeEntity.getFilmReview().getReviewId(),
-                filmReviewLikeEntity.getUser().getId()
+                filmReviewId,
+                userId
         );
     }
 }

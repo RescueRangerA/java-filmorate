@@ -19,5 +19,5 @@ public interface FilmReviewStorage {
 
     FilmReviewLike saveFilmReviewLike(FilmReviewLike entity);
 
-    void deleteFilmReviewLike(FilmReviewLike entity);
+    void deleteFilmReviewLikeByFilmReviewIdAndUserId(Long filmReviewId, Long userId);
 }
