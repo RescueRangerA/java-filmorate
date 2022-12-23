@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.model;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import lombok.*;
 import org.springframework.lang.Nullable;
@@ -40,7 +39,7 @@ public class Film {
 
     private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 
-    private List<Director> directors = new ArrayList<>();
+    private LinkedHashSet<Director> directors = new LinkedHashSet<>();
 
     public Film(
             @Nullable Long id,
@@ -57,6 +56,7 @@ public class Film {
         this.duration = duration;
         this.mpa = mpa;
         this.genres = new LinkedHashSet<>();
+        this.directors = new LinkedHashSet<>();
     }
 
     public void addGenre(Genre genre) {
@@ -79,11 +79,6 @@ public class Film {
         this.directors.add(director);
     }
 
-    public void setDirectors(final List<Director> directors) {
-        this.directors = directors
-                .stream()
-                .distinct()
-                .collect(Collectors.toList());
-    }
+
 
 }

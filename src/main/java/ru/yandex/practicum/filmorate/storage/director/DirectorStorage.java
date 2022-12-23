@@ -9,7 +9,7 @@ public interface DirectorStorage {
 
     List<Director> findAll();
 
-    Optional<Director> findbyId(final Long directorId);
+    Optional<Director> findById(final Long directorId);
 
     Optional<Director> saveDirector(final Director director);
 

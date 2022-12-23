@@ -45,7 +45,7 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public Optional<Director> findbyId(final Long directorId) {
+    public Optional<Director> findById(final Long directorId) {
         final String sqlQuery = "SELECT * FROM director WHERE id = ?";
         Director director = null;
 

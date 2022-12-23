@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
-import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.filmdirector.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.filmgenre.FilmGenreStorage;
@@ -145,7 +144,7 @@ public class FilmService {
     }
 
     public List<Film> getFilmByDirector(final Long directorId, final String sortBy) {
-        directorService.findbyId(directorId);
+        directorService.findById(directorId);
 
         return  filmStorage.getFilmByDirector(directorId, sortBy.toLowerCase());
     }

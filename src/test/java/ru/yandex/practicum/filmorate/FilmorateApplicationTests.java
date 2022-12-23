@@ -56,7 +56,7 @@ class FilmorateApplicationTests {
                                         new Genre(1L, null),
                                         new Genre(2L, null))
                         ),
-                        new ArrayList<>()
+                        new LinkedHashSet<>()
                 )
         );
         filmGenreDbStorage.deleteAllGenresOfTheFilm(film);
@@ -105,7 +105,7 @@ class FilmorateApplicationTests {
                                         new Genre(1L, null)
                                 )
                         ),
-                        new ArrayList<>()
+                        new LinkedHashSet<>()
                 )
         );
         filmGenreDbStorage.deleteAllGenresOfTheFilm(film);
@@ -150,7 +150,7 @@ class FilmorateApplicationTests {
                         190,
                         new FilmMpaRating(2L, null, null),
                         new LinkedHashSet<>(),
-                        new ArrayList<>()
+                        new LinkedHashSet<>()
                 )
         );
         filmGenreDbStorage.deleteAllGenresOfTheFilm(film);

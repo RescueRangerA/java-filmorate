@@ -22,9 +22,9 @@ public class DirectorService {
         return directorStorage.findAll();
     }
 
-    public Director findbyId(final Long id) {
+    public Director findById(final Long id) {
         return directorStorage
-                .findbyId(id)
+                .findById(id)
                 .orElseThrow(
                     ()-> new EntityIsNotFoundException(Director.class, id)
                 );
@@ -37,7 +37,7 @@ public class DirectorService {
     }
 
     public Director updateDirector(final Director director) {
-        findbyId(director.getId());
+        findById(director.getId());
 
         return directorStorage
                 .updateDirector(director)
@@ -47,8 +47,6 @@ public class DirectorService {
     }
 
     public void deleteDirector(final Long id) {
-        findbyId(id);
-
         directorStorage.deleteDirector(id);
     }
 }
