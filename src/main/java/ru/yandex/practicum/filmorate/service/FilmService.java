@@ -131,7 +131,7 @@ public class FilmService {
         if(!query.isBlank() && !by.isBlank()){
             String [] param = by.split(",");
             if(param.length == 2){
-                films = filmStorage.searchByFilmAndDirector(param[0], param[1]);
+                films = filmStorage.searchByFilmAndDirector(query);
             } else if(param.length == 1 && Objects.equals(param[0], "title")){
                 films = filmStorage.searchByFilm(query);
             } else {
