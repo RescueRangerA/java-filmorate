@@ -278,7 +278,8 @@ public class FilmDbStorage implements FilmStorage {
                     "LEFT JOIN director ON director.id = film_director.director_id " +
                     "WHERE LOWER(director.name) LIKE ? " +
                     "GROUP BY film_like.film_id, genre.id",
-                new FilmGenreMapper(), "%" + query.toLowerCase() + "%"
+                new FilmGenreMapper(),
+                "%" + query.toLowerCase() + "%"
         );
 
         Map<Long, Film> films = new HashMap<>();
@@ -305,9 +306,11 @@ public class FilmDbStorage implements FilmStorage {
                     "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
                     "LEFT JOIN film_director ON film.id = film_director.film_id " +
                     "LEFT JOIN director ON director.id = film_director.director_id " +
-                    "WHERE LOWER(film.title) LIKE '%?%' OR LOWER(director.name) LIKE '%?%'" +
+                    "WHERE LOWER(film.title) LIKE ? OR LOWER(director.name) LIKE ?" +
                     "GROUP BY film_like.film_id, genre.id",
-                new FilmGenreMapper(), "%" + param1 + "%", "%" + param2 + "%"
+                new FilmGenreMapper(),
+                "%" + param1 + "%",
+                "%" + param2 + "%"
         );
 
         Map<Long, Film> films = new HashMap<>();
