@@ -143,9 +143,14 @@ public class FilmService {
         return mpaRatingStorage.findAll();
     }
 
+
     public List<Film> getFilmByDirector(final Long directorId, final String sortBy) {
         directorService.findById(directorId);
+        
+        return filmStorage.getFilmByDirector(directorId, sortBy.toLowerCase());
+    }
 
-        return  filmStorage.getFilmByDirector(directorId, sortBy.toLowerCase());
+    public void removefilm(Long filmId) {
+        filmStorage.deleteFilmById(filmId);
     }
 }
