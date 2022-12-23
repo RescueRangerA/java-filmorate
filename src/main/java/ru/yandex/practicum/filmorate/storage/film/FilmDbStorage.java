@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingDbStorage;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class FilmDbStorage implements FilmStorage {
@@ -179,7 +180,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> findFilmsAllById(List<Long> filmIds) {
+    public LinkedList<Film> findFilmsAllById(List<Long> filmIds) {
         Assert.notNull(filmIds, "Film ids must not be null.");
 
         String inSql = String.join(",", Collections.nCopies(filmIds.size(), "?"));
@@ -275,7 +276,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> searchByFilm(String query) {
-        List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+        List<FilmGenreDirector> filmsWithGenres = jdbcTemplate.query(
             "SELECT film.*, film_mpa_rating.*, genre.*, director.*, " +
                 "COUNT(film_like.film_id) as likes " +
                 "FROM film " +
@@ -288,17 +289,23 @@ public class FilmDbStorage implements FilmStorage {
                 "WHERE LOWER(film.title) LIKE ? " +
                 "GROUP BY film_like.film_id, genre.id " +
                 "ORDER BY likes DESC",
-                new FilmGenreMapper(),
+                new FilmGenreDirectorMapper(),
                 "%" + query.toLowerCase() + "%"
         );
 
         Map<Long, Film> films = new LinkedHashMap<>();
-        for (FilmGenre filmGenre : filmsWithGenres) {
+        for (FilmGenreDirector filmGenre : filmsWithGenres) {
             Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
             Genre genre = filmGenre.getGenre();
             if (genre != null && genre.getId() != null && genre.getId() != 0L) {
                 film.addGenre(genre);
             }
+
+            final Director director = filmGenre.getDirector();
+            if(director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
+            }
+
             films.put(film.getId(), film);
         }
         return new LinkedList<>(films.values());
@@ -306,7 +313,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> searchByDirector(String query) {
-        List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+        List<FilmGenreDirector> filmsWithGenres = jdbcTemplate.query(
                 "SELECT film.*, film_mpa_rating.*, genre.*, director.*, " +
                     "COUNT(film_like.film_id) as likes " +
                     "FROM film " +
@@ -319,17 +326,23 @@ public class FilmDbStorage implements FilmStorage {
                     "WHERE LOWER(director.name) LIKE ? " +
                     "GROUP BY film_like.film_id, genre.id " +
                     "ORDER BY likes DESC",
-                new FilmGenreMapper(),
+                new FilmGenreDirectorMapper(),
                 "%" + query.toLowerCase() + "%"
         );
 
-        Map<Long, Film> films = new LinkedHashMap<>();
-        for (FilmGenre filmGenre : filmsWithGenres) {
+      Map<Long, Film> films = new LinkedHashMap<>();
+        for (FilmGenreDirector filmGenre : filmsWithGenres) {
             Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
             Genre genre = filmGenre.getGenre();
             if (genre != null && genre.getId() != null && genre.getId() != 0L) {
                 film.addGenre(genre);
             }
+
+            final Director director = filmGenre.getDirector();
+            if(director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
+            }
+
             films.put(film.getId(), film);
         }
         return new LinkedList<>(films.values());
@@ -392,7 +405,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> searchByFilmAndDirector(String query) {
-        List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+        List<FilmGenreDirector> filmsWithGenres = jdbcTemplate.query(
                 "SELECT film.*, film_mpa_rating.*, genre.*, director.*, " +
                     "COUNT(film_like.film_id) as likes " +
                     "FROM film " +
@@ -405,18 +418,24 @@ public class FilmDbStorage implements FilmStorage {
                     "WHERE LOWER(film.title) LIKE ? OR LOWER(director.name) LIKE ? " +
                     "GROUP BY film_like.film_id, genre.id " +
                     "ORDER BY likes DESC",
-                new FilmGenreMapper(),
+                new FilmGenreDirectorMapper(),
                 "%" + query.toLowerCase() + "%",
                 "%" + query.toLowerCase() + "%"
         );
 
-        Map<Long, Film> films = new LinkedHashMap<>();
-        for (FilmGenre filmGenre : filmsWithGenres) {
+      Map<Long, Film> films = new LinkedHashMap<>();
+        for (FilmGenreDirector filmGenre : filmsWithGenres) {
             Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
             Genre genre = filmGenre.getGenre();
             if (genre != null && genre.getId() != null && genre.getId() != 0L) {
                 film.addGenre(genre);
             }
+
+            final Director director = filmGenre.getDirector();
+            if(director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
+            }
+
             films.put(film.getId(), film);
         }
         return new LinkedList<>(films.values());
