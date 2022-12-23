@@ -60,4 +60,14 @@ public class FilmController {
     public List<Film> getFilmsFriends(@RequestParam Long userId, @RequestParam Long friendId) {
         return filmService.getFilmsFriends(userId, friendId);
     }
+    
+    @DeleteMapping("/{filmId}")
+    public void removeUser(@PathVariable Long filmId) {
+        filmService.removefilm(filmId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmByDirector(@PathVariable Long directorId, @RequestParam(defaultValue = "year") String sortBy) {
+        return filmService.getFilmByDirector(directorId, sortBy);
+    }
 }
