@@ -60,4 +60,14 @@ public class FilmController {
     public List<Film> search(@RequestParam String query, @RequestParam(defaultValue = "title") String by){
         return filmService.getSearch(query, by);
     }
+
+    @DeleteMapping("/{filmId}")
+    public void removeUser(@PathVariable Long filmId) {
+        filmService.removefilm(filmId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmByDirector(@PathVariable Long directorId, @RequestParam(defaultValue = "year") String sortBy) {
+        return filmService.getFilmByDirector(directorId, sortBy);
+    }
 }
