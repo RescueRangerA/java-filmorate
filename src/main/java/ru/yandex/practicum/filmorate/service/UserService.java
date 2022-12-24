@@ -2,9 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Feed;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.UserFriend;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -47,7 +45,7 @@ public class UserService {
         if (userTo.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userIdB);
         }
-
+        userStorage.addEventToFeed(new Feed(userIdA, EventType.FRIEND, OperationType.ADD, userIdB));
         return userStorage.saveUserFriend(new UserFriend(userFrom.get(), userTo.get()));
     }
 
@@ -62,7 +60,7 @@ public class UserService {
         if (userTo.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userIdB);
         }
-
+        userStorage.addEventToFeed(new Feed(userIdA, EventType.FRIEND, OperationType.REMOVE, userIdB));
         userStorage.deleteUserFriend(new UserFriend(userFrom.get(), userTo.get()));
     }
 
@@ -96,6 +94,10 @@ public class UserService {
     }
 
     public List<Feed> getFeedById(Long userId) {
-        return null;
+        Optional<User> user = userStorage.findById(userId);
+        if (user.isEmpty()) {
+            throw new EntityIsNotFoundException(User.class, userId);
+        }
+        return userStorage.getFeedById(userId);
     }
 }

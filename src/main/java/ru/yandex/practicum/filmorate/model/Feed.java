@@ -39,17 +39,14 @@ public class Feed {
     private Long entityId;
 
     public Feed(
-            @Nullable Long id,
             Long userId,
             Enum<EventType> eventType,
             Enum<OperationType> operationType,
             Long entityId
     ) {
-        this.id = id;
         this.userId = userId;
         this.eventType = eventType;
         this.operationType = operationType;
         this.entityId = entityId;
-        this.timeStamp = System.currentTimeMillis()/1000;
     }
 }

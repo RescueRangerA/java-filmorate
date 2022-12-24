@@ -67,7 +67,7 @@ public class UserController {
         userService.removeUser(userId);
     }
 
-    @GetMapping("/{id}/feed")
+    @GetMapping("/{userId}/feed")
     public List<Feed> getFeed(@PathVariable Long userId){
         return userService.getFeedById(userId);
     }

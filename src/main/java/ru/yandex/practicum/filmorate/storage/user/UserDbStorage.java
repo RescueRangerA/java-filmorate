@@ -220,21 +220,20 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addEventToFeed(Feed feed) {
-        String sql = "INSERT INTO feed (timestamp, user_id, event_type, operation, entity_id) " +
-                "VALUES (?,?,?,?,?)";
-        jdbcTemplate.update(sql, feed.getTimeStamp(), feed.getUserId(), feed.getEventType(),
-                feed.getOperationType(), feed.getEntityId());
-
+        String sql = "INSERT INTO feed (user_id, event_type, operation, entity_id) " +
+                "VALUES (?,?,?,?)";
+        jdbcTemplate.update(sql, feed.getUserId(), feed.getEventType().name(),
+                feed.getOperationType().name(), feed.getEntityId());
     }
 
     @Override
     public List<Feed> getFeedById(Long userId) {
         Assert.notNull(userId, "User id must not be null.");
-        String sql = "SELECT * FROM feed WHERE user_id = ? ORDER BY timestamp";
-        return jdbcTemplate.query(sql, (rs, row) -> mapRowFeed(rs, row), userId);
+        String sql = "SELECT * FROM feed WHERE user_id = ?";
+        return jdbcTemplate.query(sql, this::mapRowFeed, userId);
     }
 
-    private Feed mapRowFeed(ResultSet rs, int rowNum) throws SQLException {
+    private Feed mapRowFeed(ResultSet rs, int row) throws SQLException {
         Assert.notNull(rs.getString("event_type"), "Event type must not be null.");
         Assert.notNull(rs.getString("operation"), "Operation must not be null.");
         Enum<EventType> eventType = null;
@@ -261,13 +260,14 @@ public class UserDbStorage implements UserStorage {
                 operationType = OperationType.UPDATE;
                 break;
         }
+        Timestamp timestamp = rs.getObject("feed.timestamp", Timestamp.class);
         return new Feed(
-                rs.getLong("event_id.id"),
-                rs.getLong("timestamp.timeStamp"),
-                rs.getLong("user_id.userId"),
+                rs.getLong("feed.event_id"),
+                timestamp.toInstant().getEpochSecond(),
+                rs.getLong("feed.user_id"),
                 eventType,
                 operationType,
-                rs.getLong("entity_id.entityId")
+                rs.getLong("feed.entity_id")
         );
     }
 }
