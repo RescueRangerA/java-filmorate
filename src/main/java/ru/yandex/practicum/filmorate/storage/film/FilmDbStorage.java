@@ -74,11 +74,9 @@ public class FilmDbStorage implements FilmStorage {
                 new FilmGenreDirectorMapper()
         );
 
-
         Map<Long, Film> films = new HashMap<>();
         for (FilmGenreDirector filmGenre : filmsWithGenres) {
             Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
-
             Genre genre = filmGenre.getGenre();
             if (genre != null && genre.getId() != null && genre.getId() != 0L) {
                 film.addGenre(genre);
@@ -91,7 +89,6 @@ public class FilmDbStorage implements FilmStorage {
 
             films.put(film.getId(), film);
         }
-
         return new LinkedList<>(films.values());
     }
 
@@ -182,7 +179,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> findFilmsAllById(List<Long> filmIds) {
+    public LinkedList<Film> findFilmsAllById(List<Long> filmIds) {
         Assert.notNull(filmIds, "Film ids must not be null.");
 
         String inSql = String.join(",", Collections.nCopies(filmIds.size(), "?"));
@@ -205,7 +202,6 @@ public class FilmDbStorage implements FilmStorage {
 
         for (FilmGenreDirector filmGenre : filmsWithGenres) {
             Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
-
             Genre genre = filmGenre.getGenre();
             if (genre != null && genre.getId() != null && genre.getId() != 0L) {
                 film.addGenre(genre);
@@ -218,7 +214,6 @@ public class FilmDbStorage implements FilmStorage {
 
             films.put(film.getId(), film);
         }
-
         return new LinkedList<>(films.values());
     }
 
@@ -276,6 +271,80 @@ public class FilmDbStorage implements FilmStorage {
                 new FilmDbStorage.FilmMapper(),
                 limit
         );
+    }
+
+    @Override
+    public List<Film> searchByFilm(String query) {
+        List<FilmGenreDirector> filmsWithGenres = jdbcTemplate.query(
+            "SELECT film.*, film_mpa_rating.*, genre.*, director.*, " +
+                "COUNT(film_like.film_id) as likes " +
+                "FROM film " +
+                "LEFT JOIN film_like ON film.id = film_like.film_id " +
+                "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                "LEFT JOIN film_director ON film.id = film_director.film_id " +
+                "LEFT JOIN director ON director.id = film_director.director_id " +
+                "WHERE LOWER(film.title) LIKE ? " +
+                "GROUP BY film_like.film_id, genre.id " +
+                "ORDER BY likes DESC",
+                new FilmGenreDirectorMapper(),
+                "%" + query.toLowerCase() + "%"
+        );
+
+        Map<Long, Film> films = new LinkedHashMap<>();
+        for (FilmGenreDirector filmGenre : filmsWithGenres) {
+            Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
+            Genre genre = filmGenre.getGenre();
+            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
+                film.addGenre(genre);
+            }
+
+            final Director director = filmGenre.getDirector();
+            if(director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
+            }
+
+            films.put(film.getId(), film);
+        }
+        return new LinkedList<>(films.values());
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        List<FilmGenreDirector> filmsWithGenres = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.*, genre.*, director.*, " +
+                    "COUNT(film_like.film_id) as likes " +
+                    "FROM film " +
+                    "LEFT JOIN film_like ON film.id = film_like.film_id " +
+                    "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                    "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                    "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                    "LEFT JOIN film_director ON film.id = film_director.film_id " +
+                    "LEFT JOIN director ON director.id = film_director.director_id " +
+                    "WHERE LOWER(director.name) LIKE ? " +
+                    "GROUP BY film_like.film_id, genre.id " +
+                    "ORDER BY likes DESC",
+                new FilmGenreDirectorMapper(),
+                "%" + query.toLowerCase() + "%"
+        );
+
+      Map<Long, Film> films = new LinkedHashMap<>();
+        for (FilmGenreDirector filmGenre : filmsWithGenres) {
+            Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
+            Genre genre = filmGenre.getGenre();
+            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
+                film.addGenre(genre);
+            }
+
+            final Director director = filmGenre.getDirector();
+            if(director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
+            }
+
+            films.put(film.getId(), film);
+        }
+        return new LinkedList<>(films.values());
     }
 
     @Override
@@ -348,5 +417,43 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         return films;
+    }
+
+    @Override
+    public List<Film> searchByFilmAndDirector(String query) {
+        List<FilmGenreDirector> filmsWithGenres = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.*, genre.*, director.*, " +
+                    "COUNT(film_like.film_id) as likes " +
+                    "FROM film " +
+                    "LEFT JOIN film_like ON film.id = film_like.film_id " +
+                    "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                    "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                    "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                    "LEFT JOIN film_director ON film.id = film_director.film_id " +
+                    "LEFT JOIN director ON director.id = film_director.director_id " +
+                    "WHERE LOWER(film.title) LIKE ? OR LOWER(director.name) LIKE ? " +
+                    "GROUP BY film_like.film_id, genre.id " +
+                    "ORDER BY likes DESC",
+                new FilmGenreDirectorMapper(),
+                "%" + query.toLowerCase() + "%",
+                "%" + query.toLowerCase() + "%"
+        );
+
+        Map<Long, Film> films = new LinkedHashMap<>();
+        for (FilmGenreDirector filmGenre : filmsWithGenres) {
+            Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
+            Genre genre = filmGenre.getGenre();
+            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
+                film.addGenre(genre);
+            }
+
+            final Director director = filmGenre.getDirector();
+            if(director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
+            }
+
+            films.put(film.getId(), film);
+        }
+        return new LinkedList<>(films.values());
     }
 }

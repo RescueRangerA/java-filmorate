@@ -23,6 +23,12 @@ public interface FilmStorage {
 
     List<Film> findTopNMostLikedFilms(Integer limit);
 
+    List<Film> searchByFilm(String query);
+
+    List<Film> searchByDirector(String query);
+
+    List<Film> searchByFilmAndDirector(String query);
+
     List<Film> getFilmsFriends(Long userId, Long friendId);
 
     List<Film> getFilmByDirector(final Long directorId, final String sortBy);
