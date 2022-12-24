@@ -104,8 +104,16 @@ public class FilmService {
         filmStorage.deleteFilmLike(new FilmLike(film.get(), user.get()));
     }
 
-    public List<Film> getPopularFilms(Integer limit) {
-        List<FilmGenreDirector> filmGenres = filmGenreStorage.findFilmGenresOfTheFilms(filmStorage.findTopNMostLikedFilms(limit));
+    public List<Film> getPopularFilms(Integer limit, Long genreId, Integer year) {
+
+        List<FilmGenreDirector> filmGenres;
+        if ((genreId == null) && (year == null)) {
+            filmGenres = filmGenreStorage.findFilmGenresOfTheFilms(
+                    filmStorage.findTopNMostLikedFilms(limit));
+        } else {
+            filmGenres = filmGenreStorage.findFilmGenresOfTheFilms(
+                    filmStorage.findTopNMostLikedFilmsForGenreAndYear(limit, genreId, year));
+        }
 
         Map<Long, Film> films = new HashMap<>();
         for (FilmGenreDirector filmGenre : filmGenres) {
