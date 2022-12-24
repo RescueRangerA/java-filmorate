@@ -85,7 +85,7 @@ public class FilmService {
         if (user.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userId);
         }
-
+        userStorage.addEventToFeed(new Feed(userId, EventType.LIKE, OperationType.ADD, filmId));
         return filmStorage.saveFilmLike(new FilmLike(film.get(), user.get()));
     }
 
@@ -100,7 +100,7 @@ public class FilmService {
         if (user.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userId);
         }
-
+        userStorage.addEventToFeed(new Feed(userId, EventType.LIKE, OperationType.REMOVE, filmId));
         filmStorage.deleteFilmLike(new FilmLike(film.get(), user.get()));
     }
 

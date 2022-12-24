@@ -2,10 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmReview;
-import ru.yandex.practicum.filmorate.model.FilmReviewLike;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.filmreview.FilmReviewStorage;
@@ -47,7 +44,8 @@ public class FilmReviewService {
         if (user.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, filmReview.getUserId());
         }
-
+        userStorage.addEventToFeed(new Feed(filmReview.getUserId(), EventType.REVIEW,
+                OperationType.ADD, filmReview.getFilmId()));
         return filmReviewStorage.saveFilmReview(filmReview);
     }
 
@@ -62,7 +60,8 @@ public class FilmReviewService {
         if (user.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, filmReview.getUserId());
         }
-
+        userStorage.addEventToFeed(new Feed(filmReview.getUserId(), EventType.REVIEW,
+                OperationType.UPDATE, filmReview.getFilmId()));
         return filmReviewStorage.saveFilmReview(filmReview);
     }
 
@@ -85,7 +84,7 @@ public class FilmReviewService {
         if (user.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userId);
         }
-
+        userStorage.addEventToFeed(new Feed(userId, EventType.REVIEW, OperationType.ADD, filmReviewId));
         return filmReviewStorage.saveFilmReviewLike(new FilmReviewLike(filmReview.get(), user.get(), positive));
     }
 
@@ -100,7 +99,7 @@ public class FilmReviewService {
         if (user.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userId);
         }
-
+        userStorage.addEventToFeed(new Feed(userId, EventType.REVIEW, OperationType.REMOVE, filmReviewId));
         filmReviewStorage.deleteFilmReviewLikeByFilmReviewIdAndUserId(filmReviewId, userId);
     }
 }

@@ -18,7 +18,7 @@ public class Feed {
 
     @Positive
     @Nullable
-    private Long id;
+    private Long eventId;
 
     private Long timeStamp;
 

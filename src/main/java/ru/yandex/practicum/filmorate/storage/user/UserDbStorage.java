@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.relational.core.sql.Values;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -11,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.sql.*;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -263,7 +263,7 @@ public class UserDbStorage implements UserStorage {
         Timestamp timestamp = rs.getObject("feed.timestamp", Timestamp.class);
         return new Feed(
                 rs.getLong("feed.event_id"),
-                timestamp.toInstant().getEpochSecond(),
+                timestamp.getTime(),
                 rs.getLong("feed.user_id"),
                 eventType,
                 operationType,
