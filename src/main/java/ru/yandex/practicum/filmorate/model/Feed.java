@@ -20,7 +20,7 @@ public class Feed {
     @Nullable
     private Long eventId;
 
-    private Long timeStamp;
+    private Long timestamp;
 
     @Positive
     @Nullable
@@ -32,7 +32,7 @@ public class Feed {
 
     @NotBlank
     @NotNull
-    private Enum<OperationType> operationType;
+    private Enum<OperationType> operation;
 
     @Positive
     @NotNull
@@ -41,12 +41,12 @@ public class Feed {
     public Feed(
             Long userId,
             Enum<EventType> eventType,
-            Enum<OperationType> operationType,
+            Enum<OperationType> operation,
             Long entityId
     ) {
         this.userId = userId;
         this.eventType = eventType;
-        this.operationType = operationType;
+        this.operation = operation;
         this.entityId = entityId;
     }
 }

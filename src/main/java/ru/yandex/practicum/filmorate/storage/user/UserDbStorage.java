@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.sql.*;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -220,10 +219,14 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addEventToFeed(Feed feed) {
-        String sql = "INSERT INTO feed (user_id, event_type, operation, entity_id) " +
-                "VALUES (?,?,?,?)";
-        jdbcTemplate.update(sql, feed.getUserId(), feed.getEventType().name(),
-                feed.getOperationType().name(), feed.getEntityId());
+        String sql = "INSERT INTO feed (user_id, event_type, operation, entity_id) VALUES (?,?,?,?)";
+        jdbcTemplate.update(
+                sql,
+                feed.getUserId(),
+                feed.getEventType().name(),
+                feed.getOperation().name(),
+                feed.getEntityId()
+        );
     }
 
     @Override

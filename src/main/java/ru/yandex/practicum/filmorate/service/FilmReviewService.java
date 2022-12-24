@@ -44,9 +44,20 @@ public class FilmReviewService {
         if (user.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, filmReview.getUserId());
         }
-        userStorage.addEventToFeed(new Feed(filmReview.getUserId(), EventType.REVIEW,
-                OperationType.ADD, filmReview.getFilmId()));
-        return filmReviewStorage.saveFilmReview(filmReview);
+
+        filmReview = filmReviewStorage.saveFilmReview(filmReview);
+        filmReview = getById(filmReview.getReviewId());
+
+        userStorage.addEventToFeed(
+                new Feed(
+                        filmReview.getUserId(),
+                        EventType.REVIEW,
+                        OperationType.ADD,
+                        filmReview.getReviewId()
+                )
+        );
+
+        return filmReview;
     }
 
     public FilmReview update(FilmReview filmReview) {
@@ -60,12 +71,34 @@ public class FilmReviewService {
         if (user.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, filmReview.getUserId());
         }
-        userStorage.addEventToFeed(new Feed(filmReview.getUserId(), EventType.REVIEW,
-                OperationType.UPDATE, filmReview.getFilmId()));
-        return filmReviewStorage.saveFilmReview(filmReview);
+
+        filmReview = filmReviewStorage.saveFilmReview(filmReview);
+        filmReview = getById(filmReview.getReviewId());
+
+        userStorage.addEventToFeed(
+                new Feed(
+                        filmReview.getUserId(),
+                        EventType.REVIEW,
+                        OperationType.UPDATE,
+                        filmReview.getReviewId()
+                )
+        );
+
+        return filmReview;
     }
 
     public void deleteById(Long filmReviewId) {
+        FilmReview filmReview = getById(filmReviewId);
+
+        userStorage.addEventToFeed(
+                new Feed(
+                        filmReview.getUserId(),
+                        EventType.REVIEW,
+                        OperationType.REMOVE,
+                        filmReview.getReviewId()
+                )
+        );
+
         filmReviewStorage.deleteFilmReviewById(filmReviewId);
     }
 
@@ -84,7 +117,7 @@ public class FilmReviewService {
         if (user.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userId);
         }
-        userStorage.addEventToFeed(new Feed(userId, EventType.REVIEW, OperationType.ADD, filmReviewId));
+
         return filmReviewStorage.saveFilmReviewLike(new FilmReviewLike(filmReview.get(), user.get(), positive));
     }
 
@@ -99,7 +132,7 @@ public class FilmReviewService {
         if (user.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userId);
         }
-        userStorage.addEventToFeed(new Feed(userId, EventType.REVIEW, OperationType.REMOVE, filmReviewId));
+
         filmReviewStorage.deleteFilmReviewLikeByFilmReviewIdAndUserId(filmReviewId, userId);
     }
 }
