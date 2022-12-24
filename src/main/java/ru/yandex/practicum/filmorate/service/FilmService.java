@@ -183,11 +183,26 @@ public class FilmService {
     
     public List<Film> getFilmByDirector(final Long directorId, final String sortBy) {
         directorService.findById(directorId);
-        
+
         return filmStorage.getFilmByDirector(directorId, sortBy.toLowerCase());
     }
 
     public void removefilm(Long filmId) {
         filmStorage.deleteFilmById(filmId);
+    }
+
+    public List<Film> getSearch(String query, String by) {
+        List<Film> films = new ArrayList<>();
+        if(!query.isBlank() && !by.isBlank()){
+            String [] param = by.split(",");
+            if(param.length == 2){
+                films = filmStorage.searchByFilmAndDirector(query);
+            } else if(param.length == 1 && Objects.equals(param[0], "title")){
+                films = filmStorage.searchByFilm(query);
+            } else {
+                films = filmStorage.searchByDirector(query);
+            }
+        }
+        return films;
     }
 }
