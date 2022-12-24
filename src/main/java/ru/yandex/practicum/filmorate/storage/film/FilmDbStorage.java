@@ -348,6 +348,23 @@ public class FilmDbStorage implements FilmStorage {
         return new LinkedList<>(films.values());
     }
 
+    @Override
+    public List<Film> getFilmsFriends(Long userEntityA, Long userEntityB) {
+        Assert.notNull(userEntityA, "User must not be null.");
+        Assert.notNull(userEntityB, "User must not be null.");
+
+        return jdbcTemplate.query(
+                "SELECT f.*, fr.*, COUNT(f.id) as f_id FROM film as f " +
+                "LEFT JOIN film_like as fl ON f.id = fl.film_id " +
+                "LEFT JOIN film_mpa_rating as fr ON f.rating_id = fr.id " +
+                "WHERE fl.user_id IN (?, ?) " +
+                "GROUP BY f.id " +
+                "HAVING COUNT(f.id) = 2 " +
+                "ORDER BY f_id DESC",
+                new FilmDbStorage.FilmMapper(),
+                userEntityA, userEntityB);
+    }
+
     public List<Film> getFilmByDirector(final Long directorId, final String sortBy) {
         Assert.notNull(directorId, "Director id must not be null.");
 
@@ -435,6 +452,7 @@ public class FilmDbStorage implements FilmStorage {
             if(director != null && director.getId() != null && director.getId() != 0L) {
                 film.addDirector(director);
             }
+}
 
             films.put(film.getId(), film);
         }
