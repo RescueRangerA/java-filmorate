@@ -36,14 +36,14 @@ public class Feed {
 
     @Positive
     @NotNull
-    private Integer entityId;
+    private Long entityId;
 
     public Feed(
             @Nullable Long id,
             Long userId,
             Enum<EventType> eventType,
             Enum<OperationType> operationType,
-            Integer entityId
+            Long entityId
     ) {
         this.id = id;
         this.userId = userId;

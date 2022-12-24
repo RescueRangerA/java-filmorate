@@ -1,13 +1,13 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.relational.core.sql.Values;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.UserFriend;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 
 import java.sql.*;
@@ -215,6 +215,59 @@ public class UserDbStorage implements UserStorage {
                 new UserMapper(),
                 userEntityA.getId(),
                 userEntityB.getId()
+        );
+    }
+
+    @Override
+    public void addEventToFeed(Feed feed) {
+        String sql = "INSERT INTO feed (timestamp, user_id, event_type, operation, entity_id) " +
+                "VALUES (?,?,?,?,?)";
+        jdbcTemplate.update(sql, feed.getTimeStamp(), feed.getUserId(), feed.getEventType(),
+                feed.getOperationType(), feed.getEntityId());
+
+    }
+
+    @Override
+    public List<Feed> getFeedById(Long userId) {
+        Assert.notNull(userId, "User id must not be null.");
+        String sql = "SELECT * FROM feed WHERE user_id = ? ORDER BY timestamp";
+        return jdbcTemplate.query(sql, (rs, row) -> mapRowFeed(rs, row), userId);
+    }
+
+    private Feed mapRowFeed(ResultSet rs, int rowNum) throws SQLException {
+        Assert.notNull(rs.getString("event_type"), "Event type must not be null.");
+        Assert.notNull(rs.getString("operation"), "Operation must not be null.");
+        Enum<EventType> eventType = null;
+        switch (rs.getString("event_type")){
+            case "LIKE":
+                eventType = EventType.LIKE;
+                break;
+            case "REVIEW":
+                eventType = EventType.REVIEW;
+                break;
+            case "FRIEND":
+                eventType = EventType.FRIEND;
+                break;
+        }
+        Enum<OperationType> operationType = null;
+        switch (rs.getString("operation")){
+            case "REMOVE":
+                operationType = OperationType.REMOVE;
+                break;
+            case "ADD":
+                operationType = OperationType.ADD;
+                break;
+            case "UPDATE":
+                operationType = OperationType.UPDATE;
+                break;
+        }
+        return new Feed(
+                rs.getLong("event_id.id"),
+                rs.getLong("timestamp.timeStamp"),
+                rs.getLong("user_id.userId"),
+                eventType,
+                operationType,
+                rs.getLong("entity_id.entityId")
         );
     }
 }
