@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingDbStorage;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class FilmDbStorage implements FilmStorage {
@@ -440,7 +439,7 @@ public class FilmDbStorage implements FilmStorage {
                 "%" + query.toLowerCase() + "%"
         );
 
-      Map<Long, Film> films = new LinkedHashMap<>();
+        Map<Long, Film> films = new LinkedHashMap<>();
         for (FilmGenreDirector filmGenre : filmsWithGenres) {
             Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
             Genre genre = filmGenre.getGenre();
@@ -452,7 +451,6 @@ public class FilmDbStorage implements FilmStorage {
             if(director != null && director.getId() != null && director.getId() != 0L) {
                 film.addDirector(director);
             }
-}
 
             films.put(film.getId(), film);
         }
