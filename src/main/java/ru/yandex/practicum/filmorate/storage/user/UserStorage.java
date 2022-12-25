@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.UserFriend;
+import ru.yandex.practicum.filmorate.model.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,4 +23,8 @@ public interface UserStorage {
     void deleteUserFriend(UserFriend entity);
 
     List<User> findFriendsInCommonOf2Users(User userA, User userB);
+
+    void addEventToFeed(Feed feed);
+
+    List<Feed> getFeedById(Long userId);
 }

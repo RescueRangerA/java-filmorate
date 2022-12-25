@@ -2,8 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.UserFriend;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -47,7 +46,13 @@ public class UserService {
             throw new EntityIsNotFoundException(User.class, userIdB);
         }
 
-        return userStorage.saveUserFriend(new UserFriend(userFrom.get(), userTo.get()));
+        UserFriend userFriend = userStorage.saveUserFriend(new UserFriend(userFrom.get(), userTo.get()));
+        userStorage.addEventToFeed(
+                new Feed(userFriend.getFromUser().getId(),
+                        EventType.FRIEND,
+                        OperationType.ADD,
+                        userFriend.getToUser().getId()));
+        return userFriend;
     }
 
     public void removeFriend(Long userIdA, Long userIdB) {
@@ -61,8 +66,8 @@ public class UserService {
         if (userTo.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userIdB);
         }
-
         userStorage.deleteUserFriend(new UserFriend(userFrom.get(), userTo.get()));
+        userStorage.addEventToFeed(new Feed(userIdA, EventType.FRIEND, OperationType.REMOVE, userIdB));
     }
 
     public List<User> getFriendsInCommon(Long userIdA, Long userIdB) {
@@ -92,5 +97,13 @@ public class UserService {
 
     public void removeUser(Long userId) {
         userStorage.deleteById(userId);
+    }
+
+    public List<Feed> getFeedById(Long userId) {
+        Optional<User> user = userStorage.findById(userId);
+        if (user.isEmpty()) {
+            throw new EntityIsNotFoundException(User.class, userId);
+        }
+        return userStorage.getFeedById(userId);
     }
 }

@@ -85,8 +85,13 @@ public class FilmService {
         if (user.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userId);
         }
-
-        return filmStorage.saveFilmLike(new FilmLike(film.get(), user.get()));
+        FilmLike filmLike = filmStorage.saveFilmLike(new FilmLike(film.get(), user.get()));
+        userStorage.addEventToFeed(
+                new Feed(filmLike.getUser().getId(),
+                        EventType.LIKE,
+                        OperationType.ADD,
+                        filmLike.getFilm().getId()));
+        return filmLike;
     }
 
     public void removeLike(Long filmId, Long userId) {
@@ -100,8 +105,12 @@ public class FilmService {
         if (user.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userId);
         }
-
         filmStorage.deleteFilmLike(new FilmLike(film.get(), user.get()));
+        userStorage.addEventToFeed(
+                new Feed(userId,
+                        EventType.LIKE,
+                        OperationType.REMOVE,
+                        filmId));
     }
 
     public List<Film> getPopularFilms(Integer limit, Long genreId, Integer year) {
