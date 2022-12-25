@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -231,12 +232,16 @@ public class FilmDbStorage implements FilmStorage {
         Assert.notNull(filmLikeEntity.getFilm().getId(), "Film id must not be null.");
         Assert.notNull(filmLikeEntity.getUser().getId(), "User id must not be null.");
 
-        jdbcTemplate.update(con -> {
-            PreparedStatement statement = con.prepareStatement("INSERT INTO film_like (film_id, user_id) VALUES (?,?)");
-            statement.setLong(1, filmLikeEntity.getFilm().getId());
-            statement.setLong(2, filmLikeEntity.getUser().getId());
-            return statement;
-        });
+        try {
+            jdbcTemplate.update(con -> {
+                PreparedStatement statement = con.prepareStatement("INSERT INTO film_like (film_id, user_id) VALUES (?,?)");
+                statement.setLong(1, filmLikeEntity.getFilm().getId());
+                statement.setLong(2, filmLikeEntity.getUser().getId());
+                return statement;
+            });
+        } catch ( DuplicateKeyException ignore ) {
+
+        }
 
         return filmLikeEntity;
     }
