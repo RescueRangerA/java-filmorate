@@ -34,4 +34,6 @@ public interface FilmStorage {
     List<Film> getFilmByDirector(final Long directorId, final String sortBy);
 
     List<Film> getRecommendedFilms(Long userId);
+
+    List<Film> findTopNMostLikedFilmsForGenreAndYear(Integer limit, Long genreId, Integer year);
 }

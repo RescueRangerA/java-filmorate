@@ -421,6 +421,59 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> findTopNMostLikedFilmsForGenreAndYear(Integer limit, Long genreId, Integer year) {
+        Assert.notNull(limit, "Limit must not be null.");
+
+        if (limit < 1) {
+            return List.of();
+        }
+
+        final List<FilmGenreDirector> filmsWithGenres = jdbcTemplate.query(
+                "SELECT film.*,  film_mpa_rating.*, genre.*, director.* FROM film " +
+                        "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                        "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                        "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                        "LEFT JOIN film_director ON film_director.film_id = film.id " +
+                        "LEFT JOIN director ON film_director.director_id = director.id " +
+                        "LEFT JOIN film_like ON film.id = film_like.film_id " +
+                        "WHERE (YEAR(film.release_date) = ? AND genre.id = ?) OR " +
+                        "(? IS NULL AND genre.id = ?) OR " +
+                        "(YEAR(film.release_date) = ? AND ? IS NULL) " +
+                        "GROUP BY film.id, film_mpa_rating.id, genre.id, director.id " +
+                        "ORDER BY COUNT(film_like.film_id) " +
+                        "LIMIT ?",
+                new FilmGenreDirectorMapper(),
+                year,
+                genreId,
+                year,
+                genreId,
+                year,
+                genreId,
+                limit
+        );
+
+        final List<Film> films = new ArrayList<>();
+
+        for (FilmGenreDirector filmGenre : filmsWithGenres) {
+            Film film = filmGenre.getFilm();
+
+            Genre genre = filmGenre.getGenre();
+            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
+                film.addGenre(genre);
+            }
+
+            final Director director = filmGenre.getDirector();
+            if (director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
+            }
+
+            films.add(film);
+        }
+
+        return films;
+    }
+
+    @Override
     public List<Film> searchByFilmAndDirector(String query) {
         List<FilmGenreDirector> filmsWithGenres = jdbcTemplate.query(
                 "SELECT film.*, film_mpa_rating.*, genre.*, director.*, " +
