@@ -39,23 +39,21 @@ public class FilmDbStorage implements FilmStorage {
     public static class FilmGenreMapper implements RowMapper<FilmGenre> {
         @Override
         public FilmGenre mapRow(ResultSet rs, int rowNum) throws SQLException {
-            FilmGenre filmGenre = new FilmGenre(
+            return new FilmGenre(
                     new FilmMapper().mapRow(rs, rowNum),
                     new GenreDbStorage.GenreMapper().mapRow(rs, rowNum)
             );
-            return filmGenre;
         }
     }
 
     public static class FilmGenreDirectorMapper implements RowMapper<FilmGenreDirector> {
         @Override
         public FilmGenreDirector mapRow(ResultSet rs, int rowNum) throws SQLException {
-            FilmGenreDirector filmGenreDirector = new FilmGenreDirector(
+            return new FilmGenreDirector(
                     new FilmMapper().mapRow(rs, rowNum),
                     new GenreDbStorage.GenreMapper().mapRow(rs, rowNum),
                     new DirectorDbStorage.DirectorMapper().mapRow(rs, rowNum)
             );
-            return filmGenreDirector;
         }
     }
 
