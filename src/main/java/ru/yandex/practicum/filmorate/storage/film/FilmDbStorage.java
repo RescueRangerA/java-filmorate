@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -509,5 +510,42 @@ public class FilmDbStorage implements FilmStorage {
         }
         return new LinkedList<>(films.values());
     }
-}
 
+    @Override
+    public List<Film> getRecommendedFilms(Long userId) {
+        Long bestUserId = null;
+
+        try {
+            bestUserId = jdbcTemplate.queryForObject(
+                    "SELECT fl2.user_id " +
+                            "FROM film_like fl " +
+                            "JOIN film_like fl2 ON fl.film_id = fl2.film_id AND fl2.user_id != fl.user_id " +
+                            "WHERE fl.user_id = ? " +
+                            "GROUP BY fl.user_id, fl2.user_id " +
+                            "ORDER BY COUNT(*) DESC " +
+                            "LIMIT 1",
+                    Long.class,
+                    userId
+            );
+        } catch (EmptyResultDataAccessException ignore) {
+
+        }
+
+        if ( bestUserId == null ) {
+            return List.of();
+        }
+
+        List<Long> recommendedFilmIds = jdbcTemplate.query(
+                "SELECT f.id " +
+                        "FROM film as f " +
+                        "LEFT JOIN film_like fl on f.id = fl.film_id and fl.user_id = ? " +
+                        "LEFT JOIN film_like fl2 on f.id = fl2.film_id and fl2.user_id = ? " +
+                        "WHERE fl.film_id IS NULL AND fl2.film_id IS NOT NULL;",
+                (ResultSet rs, int rowNum) -> rs.getLong("film.id"),
+                userId,
+                bestUserId
+        );
+
+        return findFilmsAllById(recommendedFilmIds);
+    }
+}
