@@ -262,8 +262,10 @@ public class FilmDbStorage implements FilmStorage {
                     "FROM film " +
                     "LEFT JOIN film_like ON film.id = film_like.film_id " +
                     "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                    "LEFT JOIN film_director ON film.id = film_director.film_id " +
+                    "LEFT JOIN director ON director.id = film_director.director_id " +
                     "WHERE LOWER(director.name) LIKE ? " +
-                    "GROUP BY film_like.film_id, genre.id " +
+                    "GROUP BY film_like.film_id " +
                     "ORDER BY likes DESC",
                 new FilmMapper(),
                 "%" + query.toLowerCase() + "%"
@@ -297,17 +299,21 @@ public class FilmDbStorage implements FilmStorage {
 
         String sqlQuery = "";
         if(sortBy.equals("year")) {
-            sqlQuery = "SELECT film.*,  film_mpa_rating.* FROM film " +
+            sqlQuery = "SELECT film.*, film_mpa_rating.* FROM film " +
                     "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
-                    "WHERE director.id = ?" +
+                    "LEFT JOIN film_director ON film.id = film_director.film_id " +
+                    "LEFT JOIN director ON director.id = film_director.director_id " +
+                    "WHERE director.id = ? " +
                     "ORDER BY extract(year from CAST(release_date as DATE))";
 
         } else if(sortBy.equals("likes")) {
-            sqlQuery = "SELECT film.*,  film_mpa_rating.* FROM film " +
+            sqlQuery = "SELECT film.*, film_mpa_rating.* FROM film " +
                     "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
-                    "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                    "LEFT JOIN film_like ON film.id = film_like.film_id " +
+                    "LEFT JOIN film_director ON film.id = film_director.film_id " +
+                    "LEFT JOIN director ON director.id = film_director.director_id " +
                     "WHERE director.id = ? " +
-                    "GROUP BY film.id, film_mpa_rating.id, genre.id, director.id " +
+                    "GROUP BY film.id, film_mpa_rating.id " +
                     "ORDER BY COUNT(film_like.film_id)";
         }
 
@@ -328,21 +334,19 @@ public class FilmDbStorage implements FilmStorage {
             return List.of();
         }
 
-        final List<FilmGenreDirector> filmsWithGenres = jdbcTemplate.query(
-                "SELECT film.*,  film_mpa_rating.*, genre.*, director.* FROM film " +
+        final List<Film> films = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.* FROM film " +
                         "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
                         "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
                         "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
-                        "LEFT JOIN film_director ON film_director.film_id = film.id " +
-                        "LEFT JOIN director ON film_director.director_id = director.id " +
                         "LEFT JOIN film_like ON film.id = film_like.film_id " +
                         "WHERE (YEAR(film.release_date) = ? AND genre.id = ?) OR " +
                         "(? IS NULL AND genre.id = ?) OR " +
                         "(YEAR(film.release_date) = ? AND ? IS NULL) " +
-                        "GROUP BY film.id, film_mpa_rating.id, genre.id, director.id " +
+                        "GROUP BY film.id, film_mpa_rating.id " +
                         "ORDER BY COUNT(film_like.film_id) " +
                         "LIMIT ?",
-                new FilmGenreDirectorMapper(),
+                new FilmMapper(),
                 year,
                 genreId,
                 year,
@@ -352,25 +356,7 @@ public class FilmDbStorage implements FilmStorage {
                 limit
         );
 
-        final List<Film> films = new ArrayList<>();
-
-        for (FilmGenreDirector filmGenre : filmsWithGenres) {
-            Film film = filmGenre.getFilm();
-
-            Genre genre = filmGenre.getGenre();
-            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
-                film.addGenre(genre);
-            }
-
-            final Director director = filmGenre.getDirector();
-            if (director != null && director.getId() != null && director.getId() != 0L) {
-                film.addDirector(director);
-            }
-
-            films.add(film);
-        }
-
-        return films;
+        return completeExternalEntitiesForFilms(films);
     }
 
     @Override
@@ -380,8 +366,10 @@ public class FilmDbStorage implements FilmStorage {
                     "FROM film " +
                     "LEFT JOIN film_like ON film.id = film_like.film_id " +
                     "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                    "LEFT JOIN film_director ON film.id = film_director.film_id " +
+                    "LEFT JOIN director ON director.id = film_director.director_id " +
                     "WHERE LOWER(film.title) LIKE ? OR LOWER(director.name) LIKE ? " +
-                    "GROUP BY film_like.film_id, genre.id " +
+                    "GROUP BY film_like.film_id " +
                     "ORDER BY likes DESC",
                 new FilmMapper(),
                 "%" + query.toLowerCase() + "%",
