@@ -45,8 +45,14 @@ public class UserService {
         if (userTo.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userIdB);
         }
-        userStorage.addEventToFeed(new Feed(userIdA, EventType.FRIEND, OperationType.ADD, userIdB));
-        return userStorage.saveUserFriend(new UserFriend(userFrom.get(), userTo.get()));
+
+        UserFriend userFriend = userStorage.saveUserFriend(new UserFriend(userFrom.get(), userTo.get()));
+        userStorage.addEventToFeed(
+                new Feed(userFriend.getFromUser().getId(),
+                        EventType.FRIEND,
+                        OperationType.ADD,
+                        userFriend.getToUser().getId()));
+        return userFriend;
     }
 
     public void removeFriend(Long userIdA, Long userIdB) {
@@ -60,8 +66,8 @@ public class UserService {
         if (userTo.isEmpty()) {
             throw new EntityIsNotFoundException(User.class, userIdB);
         }
-        userStorage.addEventToFeed(new Feed(userIdA, EventType.FRIEND, OperationType.REMOVE, userIdB));
         userStorage.deleteUserFriend(new UserFriend(userFrom.get(), userTo.get()));
+        userStorage.addEventToFeed(new Feed(userIdA, EventType.FRIEND, OperationType.REMOVE, userIdB));
     }
 
     public List<User> getFriendsInCommon(Long userIdA, Long userIdB) {
