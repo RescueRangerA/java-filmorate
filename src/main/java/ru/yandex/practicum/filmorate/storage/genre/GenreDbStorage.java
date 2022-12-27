@@ -55,7 +55,7 @@ public class GenreDbStorage implements GenreStorage {
 
         }
 
-        return genre != null ? Optional.of(genre) : Optional.empty();
+        return Optional.ofNullable(genre);
     }
 
     @Override

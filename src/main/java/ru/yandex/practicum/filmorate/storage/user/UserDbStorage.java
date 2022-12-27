@@ -124,7 +124,7 @@ public class UserDbStorage implements UserStorage {
 
         }
 
-        return user != null ? Optional.of(user) : Optional.empty();
+        return Optional.ofNullable(user);
     }
 
     @Override

@@ -129,7 +129,7 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
 
         }
 
-        return filmReview != null ? Optional.of(filmReview) : Optional.empty();
+        return Optional.ofNullable(filmReview);
     }
 
     @Override

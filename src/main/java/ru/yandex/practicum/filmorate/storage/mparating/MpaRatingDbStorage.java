@@ -56,6 +56,6 @@ public class MpaRatingDbStorage implements MpaRatingStorage {
 
         }
 
-        return rating != null ? Optional.of(rating) : Optional.empty();
+        return Optional.ofNullable(rating);
     }
 }

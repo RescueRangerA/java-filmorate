@@ -157,7 +157,7 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
 
-        return film != null ? Optional.of(film) : Optional.empty();
+        return Optional.ofNullable(film);
     }
 
     @Override

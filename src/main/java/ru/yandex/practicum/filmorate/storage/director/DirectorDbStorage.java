@@ -58,7 +58,7 @@ public class DirectorDbStorage implements DirectorStorage {
         } catch (EmptyResultDataAccessException e) {
         }
 
-        return director != null ? Optional.of(director) : Optional.empty();
+        return Optional.ofNullable(director);
     }
 
     @Override
