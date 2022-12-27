@@ -22,7 +22,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     }
 
     @Override
-    public Film saveGenresOfTheFilm(Film filmEntity) {
+    public void saveGenresOfTheFilm(Film filmEntity) {
         if (filmEntity.getGenres().size() > 0) {
             Assert.notNull(filmEntity.getId(), "Film id must not be null.");
 
@@ -38,8 +38,6 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
                     }
             );
         }
-
-        return filmEntity;
     }
 
     @Override

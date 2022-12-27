@@ -19,10 +19,10 @@ public class FilmDirectorDbStorage implements FilmDirectorStorage {
     }
 
     @Override
-    public Film saveDirectorsOfTheFilm(Film film) {
-        final String sqlQuery = "INSERT INTO film_director(film_id, director_id) VALUES (?,?)";
+    public void saveDirectorsOfTheFilm(Film film) {
+        final String sqlQuery = "INSERT INTO film_director (film_id, director_id) VALUES (?,?)";
 
-        if(film.getDirectors().size() == 0) return film;
+        if (film.getDirectors().size() == 0) return;
 
         jdbcTemplate.batchUpdate(
                 sqlQuery,
@@ -33,7 +33,6 @@ public class FilmDirectorDbStorage implements FilmDirectorStorage {
                     ps.setLong(2, director.getId());
                 }
         );
-        return film;
     }
 
     @Override
