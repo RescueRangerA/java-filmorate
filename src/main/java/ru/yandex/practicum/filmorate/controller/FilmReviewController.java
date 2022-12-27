@@ -29,16 +29,12 @@ public class FilmReviewController {
 
     @PostMapping
     public FilmReview createFilmReview(@Valid @RequestBody FilmReview filmReview) {
-        filmReviewService.create(filmReview);
-
-        return getFilmReview(filmReview.getReviewId());
+        return filmReviewService.create(filmReview);
     }
 
     @PutMapping
     public FilmReview updateFilmReview(@Valid @RequestBody FilmReview filmReview) {
-        filmReviewService.update(filmReview);
-
-        return getFilmReview(filmReview.getReviewId());
+        return filmReviewService.update(filmReview);
     }
 
     @DeleteMapping("/{filmReviewId}")
