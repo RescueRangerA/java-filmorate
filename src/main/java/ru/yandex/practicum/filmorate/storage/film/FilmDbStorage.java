@@ -379,7 +379,7 @@ public class FilmDbStorage implements FilmStorage {
         return completeExternalEntitiesForFilms(films);
     }
 
-    protected List<Film> completeExternalEntitiesForFilms(List<Film> films) {
+    private List<Film> completeExternalEntitiesForFilms(List<Film> films) {
         Map<Long, LinkedHashSet<Genre>> genresMap = buildGenresMap(films);
         Map<Long, LinkedHashSet<Director>> directorsMap = buildDirectorsMap(films);
 
@@ -395,7 +395,7 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
-    protected Map<Long, LinkedHashSet<Genre>> buildGenresMap(List<Film> films) {
+    private Map<Long, LinkedHashSet<Genre>> buildGenresMap(List<Film> films) {
         List<Long> filmIds = films.stream().map(Film::getId).collect(Collectors.toList());
         String filmsInSql = String.join(",", Collections.nCopies(filmIds.size(), "?"));
 
@@ -429,7 +429,7 @@ public class FilmDbStorage implements FilmStorage {
         );
     }
 
-    protected Map<Long, LinkedHashSet<Director>> buildDirectorsMap(List<Film> films) {
+    private Map<Long, LinkedHashSet<Director>> buildDirectorsMap(List<Film> films) {
         List<Long> filmIds = films.stream().map(Film::getId).collect(Collectors.toList());
         String filmsInSql = String.join(",", Collections.nCopies(filmIds.size(), "?"));
 
