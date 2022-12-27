@@ -223,7 +223,7 @@ public class FilmDbStorage implements FilmStorage {
         Assert.notNull(limit, "Limit must not be null.");
 
         if (limit < 1) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         return jdbcTemplate.query(
@@ -331,7 +331,7 @@ public class FilmDbStorage implements FilmStorage {
         Assert.notNull(limit, "Limit must not be null.");
 
         if (limit < 1) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         final List<Film> films = jdbcTemplate.query(
@@ -484,7 +484,7 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         if ( bestUserId == null ) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         List<Long> recommendedFilmIds = jdbcTemplate.query(
