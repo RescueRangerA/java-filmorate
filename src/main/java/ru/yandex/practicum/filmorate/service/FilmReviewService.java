@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.storage.filmreview.FilmReviewStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class FilmReviewService {
@@ -34,16 +33,9 @@ public class FilmReviewService {
     }
 
     public FilmReview create(FilmReview filmReview) {
-        Optional<Film> film = filmStorage.findFilmById(filmReview.getFilmId());
-        Optional<User> user = userStorage.findById(filmReview.getUserId());
-
-        if (film.isEmpty()) {
-            throw new EntityIsNotFoundException(Film.class, filmReview.getFilmId());
-        }
-
-        if (user.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, filmReview.getUserId());
-        }
+        FilmReview finalFilmReview = filmReview;
+        filmStorage.findFilmById(filmReview.getFilmId()).orElseThrow(() -> new EntityIsNotFoundException(Film.class, finalFilmReview.getFilmId()));
+        userStorage.findById(filmReview.getUserId()).orElseThrow(() -> new EntityIsNotFoundException(User.class, finalFilmReview.getUserId()));
 
         filmReview = filmReviewStorage.saveFilmReview(filmReview);
         filmReview = getById(filmReview.getReviewId());
@@ -61,16 +53,9 @@ public class FilmReviewService {
     }
 
     public FilmReview update(FilmReview filmReview) {
-        Optional<Film> film = filmStorage.findFilmById(filmReview.getFilmId());
-        Optional<User> user = userStorage.findById(filmReview.getUserId());
-
-        if (film.isEmpty()) {
-            throw new EntityIsNotFoundException(Film.class, filmReview.getFilmId());
-        }
-
-        if (user.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, filmReview.getUserId());
-        }
+        FilmReview finalFilmReview = filmReview;
+        filmStorage.findFilmById(filmReview.getFilmId()).orElseThrow(() -> new EntityIsNotFoundException(Film.class, finalFilmReview.getFilmId()));
+        userStorage.findById(filmReview.getUserId()).orElseThrow(() -> new EntityIsNotFoundException(User.class, finalFilmReview.getUserId()));
 
         filmReview = filmReviewStorage.saveFilmReview(filmReview);
         filmReview = getById(filmReview.getReviewId());
@@ -107,32 +92,16 @@ public class FilmReviewService {
     }
 
     public FilmReviewLike addLike(Long filmReviewId, Long userId, Boolean positive) {
-        Optional<FilmReview> filmReview = filmReviewStorage.findFilmReviewById(filmReviewId);
-        Optional<User> user = userStorage.findById(userId);
+        FilmReview filmReview = filmReviewStorage.findFilmReviewById(filmReviewId).orElseThrow(() -> new EntityIsNotFoundException(FilmReview.class, filmReviewId));
+        User user = userStorage.findById(userId).orElseThrow(() -> new EntityIsNotFoundException(User.class, userId));
 
-        if (filmReview.isEmpty()) {
-            throw new EntityIsNotFoundException(FilmReview.class, filmReviewId);
-        }
-
-        if (user.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, userId);
-        }
-
-        return filmReviewStorage.saveFilmReviewLike(new FilmReviewLike(filmReview.get(), user.get(), positive));
+        return filmReviewStorage.saveFilmReviewLike(new FilmReviewLike(filmReview, user, positive));
     }
 
     public void removeLike(Long filmReviewId, Long userId) {
-        Optional<FilmReview> filmReview = filmReviewStorage.findFilmReviewById(filmReviewId);
-        Optional<User> user = userStorage.findById(userId);
+        FilmReview filmReview = filmReviewStorage.findFilmReviewById(filmReviewId).orElseThrow(() -> new EntityIsNotFoundException(FilmReview.class, filmReviewId));
+        User user = userStorage.findById(userId).orElseThrow(() -> new EntityIsNotFoundException(User.class, userId));
 
-        if (filmReview.isEmpty()) {
-            throw new EntityIsNotFoundException(FilmReview.class, filmReviewId);
-        }
-
-        if (user.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, userId);
-        }
-
-        filmReviewStorage.deleteFilmReviewLikeByFilmReviewIdAndUserId(filmReviewId, userId);
+        filmReviewStorage.deleteFilmReviewLikeByFilmReviewIdAndUserId(filmReview.getReviewId(), user.getId());
     }
 }
