@@ -39,7 +39,16 @@ public class Film {
 
     private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 
-    public Film(@Nullable Long id, String name, String description, LocalDate releaseDate, Integer duration, FilmMpaRating mpa) {
+    private LinkedHashSet<Director> directors = new LinkedHashSet<>();
+
+    public Film(
+            @Nullable Long id,
+            String name,
+            String description,
+            LocalDate releaseDate,
+            Integer duration,
+            FilmMpaRating mpa
+    ) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -47,6 +56,7 @@ public class Film {
         this.duration = duration;
         this.mpa = mpa;
         this.genres = new LinkedHashSet<>();
+        this.directors = new LinkedHashSet<>();
     }
 
     public void addGenre(Genre genre) {
@@ -64,4 +74,11 @@ public class Film {
             }
         }
     }
+
+    public void addDirector(final Director director) {
+        this.directors.add(director);
+    }
+
+
+
 }

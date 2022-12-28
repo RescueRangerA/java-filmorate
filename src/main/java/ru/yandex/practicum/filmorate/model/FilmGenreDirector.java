@@ -11,11 +11,16 @@ import javax.validation.constraints.Positive;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FilmGenre {
+
+public class FilmGenreDirector {
+
     @Positive
     private Film film;
 
     @Positive
     private Genre genre;
+
+    @Positive
+    private Director director;
 
 }

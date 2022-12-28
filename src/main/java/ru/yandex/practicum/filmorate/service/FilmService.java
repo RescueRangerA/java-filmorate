@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.filmdirector.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.filmgenre.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingStorage;
@@ -23,19 +24,27 @@ public class FilmService {
 
     final private GenreStorage genreStorage;
 
+    final private FilmDirectorStorage filmDirectorStorage;
+
+    final private DirectorService directorService;
+
     @Autowired
     public FilmService(
             FilmStorage filmStorage,
             MpaRatingStorage mpaRatingStorage,
             FilmGenreStorage filmGenreStorage,
             UserStorage userStorage,
-            GenreStorage genreStorage
+            GenreStorage genreStorage,
+            FilmDirectorStorage filmDirectorStorage,
+            DirectorService directorService
     ) {
         this.filmStorage = filmStorage;
         this.mpaRatingStorage = mpaRatingStorage;
         this.filmGenreStorage = filmGenreStorage;
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
+        this.filmDirectorStorage = filmDirectorStorage;
+        this.directorService = directorService;
     }
 
     public List<Film> findAll() {
@@ -46,6 +55,7 @@ public class FilmService {
         Film newFilm = filmStorage.saveFilm(film);
         filmGenreStorage.deleteAllGenresOfTheFilm(film);
         filmGenreStorage.saveGenresOfTheFilm(film);
+        filmDirectorStorage.saveDirectorsOfTheFilm(film);
 
         return getById(newFilm.getId());
     }
@@ -54,6 +64,8 @@ public class FilmService {
         Film newFilm = filmStorage.saveFilm(film);
         filmGenreStorage.deleteAllGenresOfTheFilm(film);
         filmGenreStorage.saveGenresOfTheFilm(film);
+        filmDirectorStorage.deleteDirectorsFromFilm(newFilm);
+        filmDirectorStorage.saveDirectorsOfTheFilm(newFilm);
 
         return getById(newFilm.getId());
     }
@@ -63,45 +75,60 @@ public class FilmService {
     }
 
     public FilmLike addLike(Long filmId, Long userId) {
-        Optional<Film> film = filmStorage.findFilmById(filmId);
-        Optional<User> user = userStorage.findById(userId);
+        Film film = filmStorage.findFilmById(filmId).orElseThrow(() -> new EntityIsNotFoundException(Film.class, filmId));
+        User user = userStorage.findById(userId).orElseThrow(() -> new EntityIsNotFoundException(User.class, userId));
 
-        if (film.isEmpty()) {
-            throw new EntityIsNotFoundException(Film.class, filmId);
-        }
+        FilmLike filmLike = filmStorage.saveFilmLike(new FilmLike(film, user));
 
-        if (user.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, userId);
-        }
+        userStorage.addEventToFeed(
+                new Feed(filmLike.getUser().getId(),
+                        EventType.LIKE,
+                        OperationType.ADD,
+                        filmLike.getFilm().getId()
+                )
+        );
 
-        return filmStorage.saveFilmLike(new FilmLike(film.get(), user.get()));
+        return filmLike;
     }
 
     public void removeLike(Long filmId, Long userId) {
-        Optional<Film> film = filmStorage.findFilmById(filmId);
-        Optional<User> user = userStorage.findById(userId);
+        Film film = filmStorage.findFilmById(filmId).orElseThrow(() -> new EntityIsNotFoundException(Film.class, filmId));
+        User user = userStorage.findById(userId).orElseThrow(() -> new EntityIsNotFoundException(User.class, userId));
 
-        if (film.isEmpty()) {
-            throw new EntityIsNotFoundException(Film.class, filmId);
-        }
+        filmStorage.deleteFilmLike(new FilmLike(film, user));
 
-        if (user.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, userId);
-        }
-
-        filmStorage.deleteFilmLike(new FilmLike(film.get(), user.get()));
+        userStorage.addEventToFeed(
+                new Feed(userId,
+                        EventType.LIKE,
+                        OperationType.REMOVE,
+                        filmId
+                )
+        );
     }
 
-    public List<Film> getPopularFilms(Integer limit) {
-        List<FilmGenre> filmGenres = filmGenreStorage.findFilmGenresOfTheFilms(filmStorage.findTopNMostLikedFilms(limit));
+    public List<Film> getPopularFilms(Integer limit, Long genreId, Integer year) {
+
+        List<FilmGenreDirector> filmGenres;
+        if ((genreId == null) && (year == null)) {
+            filmGenres = filmGenreStorage.findFilmGenresOfTheFilms(
+                    filmStorage.findTopNMostLikedFilms(limit));
+        } else {
+            filmGenres = filmGenreStorage.findFilmGenresOfTheFilms(
+                    filmStorage.findTopNMostLikedFilmsForGenreAndYear(limit, genreId, year));
+        }
 
         Map<Long, Film> films = new HashMap<>();
-        for (FilmGenre filmGenre : filmGenres) {
+        for (FilmGenreDirector filmGenre : filmGenres) {
             Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
 
             Genre genre = filmGenre.getGenre();
             if (genre != null && genre.getId() != null && genre.getId() != 0L) {
                 film.addGenre(genre);
+            }
+
+            final Director director = filmGenre.getDirector();
+            if (director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
             }
 
             films.put(film.getId(), film);
@@ -124,5 +151,37 @@ public class FilmService {
 
     public List<FilmMpaRating> findAllRatings() {
         return mpaRatingStorage.findAll();
+    }
+
+    public List<Film> getFilmsFriends(Long userId, Long friendId) {
+        User userA = userStorage.findById(userId).orElseThrow(() -> new EntityIsNotFoundException(User.class, userId));
+        User userB = userStorage.findById(friendId).orElseThrow(() -> new EntityIsNotFoundException(User.class, friendId));
+
+        return filmStorage.getFilmsFriends(userA.getId(), userB.getId());
+    }
+
+    public List<Film> getFilmByDirector(final Long directorId, final String sortBy) {
+        directorService.findById(directorId);
+
+        return filmStorage.getFilmByDirector(directorId, sortBy.toLowerCase());
+    }
+
+    public void removeFilm(Long filmId) {
+        filmStorage.deleteFilmById(filmId);
+    }
+
+    public List<Film> getSearch(String query, String by) {
+        List<Film> films = new ArrayList<>();
+        if (!query.isBlank() && !by.isBlank()) {
+            String[] param = by.split(",");
+            if (param.length == 2) {
+                films = filmStorage.searchByFilmAndDirector(query);
+            } else if (param.length == 1 && Objects.equals(param[0], "title")) {
+                films = filmStorage.searchByFilm(query);
+            } else {
+                films = filmStorage.searchByDirector(query);
+            }
+        }
+        return films;
     }
 }
