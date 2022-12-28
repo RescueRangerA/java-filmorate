@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -59,6 +60,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -157,7 +159,7 @@ public class FilmDbStorage implements FilmStorage {
             }
         }
 
-        return film != null ? Optional.of(film) : Optional.empty();
+        return Optional.ofNullable(film);
     }
 
     @Override
@@ -223,7 +225,7 @@ public class FilmDbStorage implements FilmStorage {
         Assert.notNull(limit, "Limit must not be null.");
 
         if (limit < 1) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         return jdbcTemplate.query(
@@ -331,7 +333,7 @@ public class FilmDbStorage implements FilmStorage {
         Assert.notNull(limit, "Limit must not be null.");
 
         if (limit < 1) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         final List<Film> films = jdbcTemplate.query(
@@ -379,23 +381,23 @@ public class FilmDbStorage implements FilmStorage {
         return completeExternalEntitiesForFilms(films);
     }
 
-    protected List<Film> completeExternalEntitiesForFilms(List<Film> films) {
-        Map<Long, LinkedHashSet<Genre>> genresMap = buildGenresMap(films);
-        Map<Long, LinkedHashSet<Director>> directorsMap = buildDirectorsMap(films);
+    private List<Film> completeExternalEntitiesForFilms(List<Film> films) {
+        Map<Long, Set<Genre>> genres = buildGenresMap(films);
+        Map<Long, Set<Director>> directors = buildDirectorsMap(films);
 
         for (Film film : films) {
-            if (genresMap.containsKey(film.getId())) {
-                film.setGenres(genresMap.get(film.getId()));
+            if (genres.containsKey(film.getId())) {
+                film.setGenres((LinkedHashSet<Genre>) genres.get(film.getId()));
             }
-            if (directorsMap.containsKey(film.getId())) {
-                film.setDirectors(directorsMap.get(film.getId()));
+            if (directors.containsKey(film.getId())) {
+                film.setDirectors((LinkedHashSet<Director>) directors.get(film.getId()));
             }
         }
 
         return films;
     }
 
-    protected Map<Long, LinkedHashSet<Genre>> buildGenresMap(List<Film> films) {
+    private Map<Long, Set<Genre>> buildGenresMap(List<Film> films) {
         List<Long> filmIds = films.stream().map(Film::getId).collect(Collectors.toList());
         String filmsInSql = String.join(",", Collections.nCopies(filmIds.size(), "?"));
 
@@ -407,13 +409,13 @@ public class FilmDbStorage implements FilmStorage {
                                 "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
                                 "WHERE film.id IN (%s)", filmsInSql),
                 rs -> {
-                    Map<Long, LinkedHashSet<Genre>> resultMap = new LinkedHashMap<>();
+                    Map<Long, Set<Genre>> resultMap = new LinkedHashMap<>();
                     int rowNum = 0;
 
                     while (rs.next()) {
                         Long filmId = rs.getLong("film.id");
 
-                        LinkedHashSet<Genre> genres = resultMap.getOrDefault(filmId, new LinkedHashSet<>());
+                        Set<Genre> genres = resultMap.getOrDefault(filmId, new LinkedHashSet<>());
                         Genre genre = new GenreDbStorage.GenreMapper().mapRow(rs, rowNum);
                         if (genre != null && genre.getId() != null && genre.getId() != 0L) {
                             genres.add(genre);
@@ -429,7 +431,7 @@ public class FilmDbStorage implements FilmStorage {
         );
     }
 
-    protected Map<Long, LinkedHashSet<Director>> buildDirectorsMap(List<Film> films) {
+    private Map<Long, Set<Director>> buildDirectorsMap(List<Film> films) {
         List<Long> filmIds = films.stream().map(Film::getId).collect(Collectors.toList());
         String filmsInSql = String.join(",", Collections.nCopies(filmIds.size(), "?"));
 
@@ -441,13 +443,13 @@ public class FilmDbStorage implements FilmStorage {
                                 "LEFT JOIN director ON film_director.director_id = director.id " +
                                 "WHERE film.id IN (%s)", filmsInSql),
                 rs -> {
-                    Map<Long, LinkedHashSet<Director>> resultMap = new LinkedHashMap<>();
+                    Map<Long, Set<Director>> resultMap = new LinkedHashMap<>();
                     int rowNum = 0;
 
                     while (rs.next()) {
                         Long filmId = rs.getLong("film.id");
 
-                        LinkedHashSet<Director> directors = resultMap.getOrDefault(filmId, new LinkedHashSet<>());
+                        Set<Director> directors = resultMap.getOrDefault(filmId, new LinkedHashSet<>());
                         Director director = new DirectorDbStorage.DirectorMapper().mapRow(rs, rowNum);
                         if (director != null && director.getId() != null && director.getId() != 0L) {
                             directors.add(director);
@@ -484,7 +486,7 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         if ( bestUserId == null ) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         List<Long> recommendedFilmIds = jdbcTemplate.query(

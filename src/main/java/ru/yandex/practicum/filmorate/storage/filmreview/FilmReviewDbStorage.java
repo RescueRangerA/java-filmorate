@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.filmreview;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -32,6 +33,7 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Autowired
     public FilmReviewDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -129,7 +131,7 @@ public class FilmReviewDbStorage implements FilmReviewStorage {
 
         }
 
-        return filmReview != null ? Optional.of(filmReview) : Optional.empty();
+        return Optional.ofNullable(filmReview);
     }
 
     @Override

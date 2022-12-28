@@ -75,42 +75,35 @@ public class FilmService {
     }
 
     public FilmLike addLike(Long filmId, Long userId) {
-        Optional<Film> film = filmStorage.findFilmById(filmId);
-        Optional<User> user = userStorage.findById(userId);
+        Film film = filmStorage.findFilmById(filmId).orElseThrow(() -> new EntityIsNotFoundException(Film.class, filmId));
+        User user = userStorage.findById(userId).orElseThrow(() -> new EntityIsNotFoundException(User.class, userId));
 
-        if (film.isEmpty()) {
-            throw new EntityIsNotFoundException(Film.class, filmId);
-        }
+        FilmLike filmLike = filmStorage.saveFilmLike(new FilmLike(film, user));
 
-        if (user.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, userId);
-        }
-        FilmLike filmLike = filmStorage.saveFilmLike(new FilmLike(film.get(), user.get()));
         userStorage.addEventToFeed(
                 new Feed(filmLike.getUser().getId(),
                         EventType.LIKE,
                         OperationType.ADD,
-                        filmLike.getFilm().getId()));
+                        filmLike.getFilm().getId()
+                )
+        );
+
         return filmLike;
     }
 
     public void removeLike(Long filmId, Long userId) {
-        Optional<Film> film = filmStorage.findFilmById(filmId);
-        Optional<User> user = userStorage.findById(userId);
+        Film film = filmStorage.findFilmById(filmId).orElseThrow(() -> new EntityIsNotFoundException(Film.class, filmId));
+        User user = userStorage.findById(userId).orElseThrow(() -> new EntityIsNotFoundException(User.class, userId));
 
-        if (film.isEmpty()) {
-            throw new EntityIsNotFoundException(Film.class, filmId);
-        }
+        filmStorage.deleteFilmLike(new FilmLike(film, user));
 
-        if (user.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, userId);
-        }
-        filmStorage.deleteFilmLike(new FilmLike(film.get(), user.get()));
         userStorage.addEventToFeed(
                 new Feed(userId,
                         EventType.LIKE,
                         OperationType.REMOVE,
-                        filmId));
+                        filmId
+                )
+        );
     }
 
     public List<Film> getPopularFilms(Integer limit, Long genreId, Integer year) {
@@ -134,7 +127,7 @@ public class FilmService {
             }
 
             final Director director = filmGenre.getDirector();
-            if(director != null && director.getId() != null && director.getId() != 0L) {
+            if (director != null && director.getId() != null && director.getId() != 0L) {
                 film.addDirector(director);
             }
 
@@ -161,38 +154,29 @@ public class FilmService {
     }
 
     public List<Film> getFilmsFriends(Long userId, Long friendId) {
+        User userA = userStorage.findById(userId).orElseThrow(() -> new EntityIsNotFoundException(User.class, userId));
+        User userB = userStorage.findById(friendId).orElseThrow(() -> new EntityIsNotFoundException(User.class, friendId));
 
-        Optional<User> userA = userStorage.findById(userId);
-        Optional<User> userB = userStorage.findById(friendId);
-
-        if (userA.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, userId);
-        }
-
-        if (userB.isEmpty()) {
-            throw new EntityIsNotFoundException(User.class, friendId);
-        }
-
-        return filmStorage.getFilmsFriends(userId, friendId);
+        return filmStorage.getFilmsFriends(userA.getId(), userB.getId());
     }
-    
+
     public List<Film> getFilmByDirector(final Long directorId, final String sortBy) {
         directorService.findById(directorId);
 
         return filmStorage.getFilmByDirector(directorId, sortBy.toLowerCase());
     }
 
-    public void removefilm(Long filmId) {
+    public void removeFilm(Long filmId) {
         filmStorage.deleteFilmById(filmId);
     }
 
     public List<Film> getSearch(String query, String by) {
         List<Film> films = new ArrayList<>();
-        if(!query.isBlank() && !by.isBlank()){
-            String [] param = by.split(",");
-            if(param.length == 2){
+        if (!query.isBlank() && !by.isBlank()) {
+            String[] param = by.split(",");
+            if (param.length == 2) {
                 films = filmStorage.searchByFilmAndDirector(query);
-            } else if(param.length == 1 && Objects.equals(param[0], "title")){
+            } else if (param.length == 1 && Objects.equals(param[0], "title")) {
                 films = filmStorage.searchByFilm(query);
             } else {
                 films = filmStorage.searchByDirector(query);

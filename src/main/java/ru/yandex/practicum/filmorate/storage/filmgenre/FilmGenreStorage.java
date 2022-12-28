@@ -8,7 +8,7 @@ import java.util.List;
 public interface FilmGenreStorage {
     void deleteAllGenresOfTheFilm(Film film);
 
-    Film saveGenresOfTheFilm(Film film);
+    void saveGenresOfTheFilm(Film film);
 
     List<FilmGenreDirector> findFilmGenresOfTheFilms(List<Film> filmEntities);
 }

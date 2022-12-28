@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -61,6 +62,7 @@ public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Autowired
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -124,7 +126,7 @@ public class UserDbStorage implements UserStorage {
 
         }
 
-        return user != null ? Optional.of(user) : Optional.empty();
+        return Optional.ofNullable(user);
     }
 
     @Override
@@ -239,30 +241,10 @@ public class UserDbStorage implements UserStorage {
     private Feed mapRowFeed(ResultSet rs, int row) throws SQLException {
         Assert.notNull(rs.getString("event_type"), "Event type must not be null.");
         Assert.notNull(rs.getString("operation"), "Operation must not be null.");
-        Enum<EventType> eventType = null;
-        switch (rs.getString("event_type")){
-            case "LIKE":
-                eventType = EventType.LIKE;
-                break;
-            case "REVIEW":
-                eventType = EventType.REVIEW;
-                break;
-            case "FRIEND":
-                eventType = EventType.FRIEND;
-                break;
-        }
-        Enum<OperationType> operationType = null;
-        switch (rs.getString("operation")){
-            case "REMOVE":
-                operationType = OperationType.REMOVE;
-                break;
-            case "ADD":
-                operationType = OperationType.ADD;
-                break;
-            case "UPDATE":
-                operationType = OperationType.UPDATE;
-                break;
-        }
+
+        Enum<EventType> eventType = EventType.valueOf(rs.getString("event_type"));
+        Enum<OperationType> operationType = OperationType.valueOf(rs.getString("operation"));
+
         Timestamp timestamp = rs.getObject("feed.timestamp", Timestamp.class);
         return new Feed(
                 rs.getLong("feed.event_id"),

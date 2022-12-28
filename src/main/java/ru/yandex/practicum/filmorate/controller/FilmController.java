@@ -71,7 +71,7 @@ public class FilmController {
 
     @DeleteMapping("/{filmId}")
     public void removeUser(@PathVariable Long filmId) {
-        filmService.removefilm(filmId);
+        filmService.removeFilm(filmId);
     }
 
     @GetMapping("/director/{directorId}")
