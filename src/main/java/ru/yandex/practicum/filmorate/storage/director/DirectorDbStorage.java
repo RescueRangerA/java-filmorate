@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.director;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -19,6 +20,7 @@ public class DirectorDbStorage implements DirectorStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
+    @Autowired
     public DirectorDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

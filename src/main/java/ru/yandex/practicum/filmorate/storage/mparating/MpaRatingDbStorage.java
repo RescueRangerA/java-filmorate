@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.mparating;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -28,6 +29,8 @@ public class MpaRatingDbStorage implements MpaRatingStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
+
+    @Autowired
     public MpaRatingDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
