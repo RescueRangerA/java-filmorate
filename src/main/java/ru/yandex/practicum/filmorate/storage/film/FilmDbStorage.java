@@ -1,5 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -7,12 +10,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.EntityIsNotFoundException;
+import ru.yandex.practicum.filmorate.storage.director.DirectorDbStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.mparating.MpaRatingDbStorage;
 
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class FilmDbStorage implements FilmStorage {
@@ -42,36 +47,33 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+    public static class FilmGenreDirectorMapper implements RowMapper<FilmGenreDirector> {
+        @Override
+        public FilmGenreDirector mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return new FilmGenreDirector(
+                    new FilmMapper().mapRow(rs, rowNum),
+                    new GenreDbStorage.GenreMapper().mapRow(rs, rowNum),
+                    new DirectorDbStorage.DirectorMapper().mapRow(rs, rowNum)
+            );
+        }
+    }
+
     private final JdbcTemplate jdbcTemplate;
 
+    @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public List<Film> findFilmsAll() {
-        List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
-                "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
-                        "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
-                        "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
-                        "LEFT JOIN genre ON genre.id = film_genre.genre_id ",
-                new FilmGenreMapper()
+        List<Film> films = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.* FROM film " +
+                        "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id ",
+                new FilmMapper()
         );
 
-
-        Map<Long, Film> films = new HashMap<>();
-        for (FilmGenre filmGenre : filmsWithGenres) {
-            Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
-
-            Genre genre = filmGenre.getGenre();
-            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
-                film.addGenre(genre);
-            }
-
-            films.put(film.getId(), film);
-        }
-
-        return new LinkedList<>(films.values());
+        return completeExternalEntitiesForFilms(films);
     }
 
     @Override
@@ -127,19 +129,21 @@ public class FilmDbStorage implements FilmStorage {
     public Optional<Film> findFilmById(Long filmId) {
         Assert.notNull(filmId, "Film id must not be null.");
 
-        List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
-                "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
+        List<FilmGenreDirector> filmsWithGenres = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.*, genre.*, director.* FROM film " +
                         "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
                         "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
                         "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                        "LEFT JOIN film_director ON film_director.film_id = film.id " +
+                        "LEFT JOIN director ON film_director.director_id = director.id " +
                         "WHERE film.id = ?",
-                new FilmGenreMapper(),
+                new FilmGenreDirectorMapper(),
                 filmId
         );
 
 
         Film film = null;
-        for (FilmGenre filmGenre : filmsWithGenres) {
+        for (FilmGenreDirector filmGenre : filmsWithGenres) {
             if (film == null) {
                 film = filmGenre.getFilm();
             }
@@ -148,9 +152,14 @@ public class FilmDbStorage implements FilmStorage {
             if (genre != null && genre.getId() != null && genre.getId() != 0L) {
                 film.addGenre(genre);
             }
+
+            final Director director = filmGenre.getDirector();
+            if (director != null && director.getId() != null && director.getId() != 0L) {
+                film.addDirector(director);
+            }
         }
 
-        return film != null ? Optional.of(film) : Optional.empty();
+        return Optional.ofNullable(film);
     }
 
     @Override
@@ -159,31 +168,16 @@ public class FilmDbStorage implements FilmStorage {
 
         String inSql = String.join(",", Collections.nCopies(filmIds.size(), "?"));
 
-        List<FilmGenre> filmsWithGenres = jdbcTemplate.query(
+        List<Film> films = jdbcTemplate.query(
                 String.format(
-                        "SELECT film.*, film_mpa_rating.*, genre.* FROM film " +
+                        "SELECT film.*, film_mpa_rating.* FROM film " +
                                 "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
-                                "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
-                                "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
                                 "WHERE film.id IN (%s)", inSql),
-                new FilmGenreMapper(),
+                new FilmMapper(),
                 filmIds.toArray()
         );
 
-
-        Map<Long, Film> films = new HashMap<>();
-        for (FilmGenre filmGenre : filmsWithGenres) {
-            Film film = films.getOrDefault(filmGenre.getFilm().getId(), filmGenre.getFilm());
-
-            Genre genre = filmGenre.getGenre();
-            if (genre != null && genre.getId() != null && genre.getId() != 0L) {
-                film.addGenre(genre);
-            }
-
-            films.put(film.getId(), film);
-        }
-
-        return new LinkedList<>(films.values());
+        return completeExternalEntitiesForFilms(films);
     }
 
     @Override
@@ -199,12 +193,16 @@ public class FilmDbStorage implements FilmStorage {
         Assert.notNull(filmLikeEntity.getFilm().getId(), "Film id must not be null.");
         Assert.notNull(filmLikeEntity.getUser().getId(), "User id must not be null.");
 
-        jdbcTemplate.update(con -> {
-            PreparedStatement statement = con.prepareStatement("INSERT INTO film_like (film_id, user_id) VALUES (?,?)");
-            statement.setLong(1, filmLikeEntity.getFilm().getId());
-            statement.setLong(2, filmLikeEntity.getUser().getId());
-            return statement;
-        });
+        try {
+            jdbcTemplate.update(con -> {
+                PreparedStatement statement = con.prepareStatement("INSERT INTO film_like (film_id, user_id) VALUES (?,?)");
+                statement.setLong(1, filmLikeEntity.getFilm().getId());
+                statement.setLong(2, filmLikeEntity.getUser().getId());
+                return statement;
+            });
+        } catch ( DuplicateKeyException ignore ) {
+
+        }
 
         return filmLikeEntity;
     }
@@ -227,7 +225,7 @@ public class FilmDbStorage implements FilmStorage {
         Assert.notNull(limit, "Limit must not be null.");
 
         if (limit < 1) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         return jdbcTemplate.query(
@@ -240,5 +238,268 @@ public class FilmDbStorage implements FilmStorage {
                 new FilmDbStorage.FilmMapper(),
                 limit
         );
+    }
+
+    @Override
+    public List<Film> searchByFilm(String query) {
+        List<Film> films = jdbcTemplate.query(
+            "SELECT film.*, film_mpa_rating.*, COUNT(film_like.film_id) as likes " +
+                "FROM film " +
+                "LEFT JOIN film_like ON film.id = film_like.film_id " +
+                "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                "WHERE LOWER(film.title) LIKE ? " +
+                "GROUP BY film_like.film_id " +
+                "ORDER BY likes DESC",
+                new FilmMapper(),
+                "%" + query.toLowerCase() + "%"
+        );
+
+        return completeExternalEntitiesForFilms(films);
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        List<Film> films = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.*, COUNT(film_like.film_id) as likes " +
+                    "FROM film " +
+                    "LEFT JOIN film_like ON film.id = film_like.film_id " +
+                    "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                    "LEFT JOIN film_director ON film.id = film_director.film_id " +
+                    "LEFT JOIN director ON director.id = film_director.director_id " +
+                    "WHERE LOWER(director.name) LIKE ? " +
+                    "GROUP BY film_like.film_id " +
+                    "ORDER BY likes DESC",
+                new FilmMapper(),
+                "%" + query.toLowerCase() + "%"
+        );
+
+        return completeExternalEntitiesForFilms(films);
+    }
+
+    @Override
+    public List<Film> getFilmsFriends(Long userEntityA, Long userEntityB) {
+        Assert.notNull(userEntityA, "User must not be null.");
+        Assert.notNull(userEntityB, "User must not be null.");
+
+        List<Film> films = jdbcTemplate.query(
+                "SELECT f.*, fr.*, COUNT(f.id) as f_id FROM film as f " +
+                "LEFT JOIN film_like as fl ON f.id = fl.film_id " +
+                "LEFT JOIN film_mpa_rating as fr ON f.rating_id = fr.id " +
+                "WHERE fl.user_id IN (?, ?) " +
+                "GROUP BY f.id " +
+                "HAVING COUNT(f.id) = 2 " +
+                "ORDER BY f_id DESC",
+                new FilmDbStorage.FilmMapper(),
+                userEntityA, userEntityB);
+
+        return completeExternalEntitiesForFilms(films);
+    }
+
+    @Override
+    public List<Film> getFilmByDirector(final Long directorId, final String sortBy) {
+        Assert.notNull(directorId, "Director id must not be null.");
+
+        String sqlQuery = "";
+        if(sortBy.equals("year")) {
+            sqlQuery = "SELECT film.*, film_mpa_rating.* FROM film " +
+                    "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                    "LEFT JOIN film_director ON film.id = film_director.film_id " +
+                    "LEFT JOIN director ON director.id = film_director.director_id " +
+                    "WHERE director.id = ? " +
+                    "ORDER BY extract(year from CAST(release_date as DATE))";
+
+        } else if(sortBy.equals("likes")) {
+            sqlQuery = "SELECT film.*, film_mpa_rating.* FROM film " +
+                    "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                    "LEFT JOIN film_like ON film.id = film_like.film_id " +
+                    "LEFT JOIN film_director ON film.id = film_director.film_id " +
+                    "LEFT JOIN director ON director.id = film_director.director_id " +
+                    "WHERE director.id = ? " +
+                    "GROUP BY film.id, film_mpa_rating.id " +
+                    "ORDER BY COUNT(film_like.film_id)";
+        }
+
+        final List<Film> films = jdbcTemplate.query(
+                sqlQuery,
+                new FilmMapper(),
+                directorId
+        );
+
+        return completeExternalEntitiesForFilms(films);
+    }
+
+    @Override
+    public List<Film> findTopNMostLikedFilmsForGenreAndYear(Integer limit, Long genreId, Integer year) {
+        Assert.notNull(limit, "Limit must not be null.");
+
+        if (limit < 1) {
+            return Collections.emptyList();
+        }
+
+        final List<Film> films = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.* FROM film " +
+                        "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                        "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                        "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                        "LEFT JOIN film_like ON film.id = film_like.film_id " +
+                        "WHERE (YEAR(film.release_date) = ? AND genre.id = ?) OR " +
+                        "(? IS NULL AND genre.id = ?) OR " +
+                        "(YEAR(film.release_date) = ? AND ? IS NULL) " +
+                        "GROUP BY film.id, film_mpa_rating.id " +
+                        "ORDER BY COUNT(film_like.film_id) " +
+                        "LIMIT ?",
+                new FilmMapper(),
+                year,
+                genreId,
+                year,
+                genreId,
+                year,
+                genreId,
+                limit
+        );
+
+        return completeExternalEntitiesForFilms(films);
+    }
+
+    @Override
+    public List<Film> searchByFilmAndDirector(String query) {
+        List<Film> films = jdbcTemplate.query(
+                "SELECT film.*, film_mpa_rating.*, COUNT(film_like.film_id) as likes " +
+                    "FROM film " +
+                    "LEFT JOIN film_like ON film.id = film_like.film_id " +
+                    "LEFT JOIN film_mpa_rating ON film.rating_id = film_mpa_rating.id " +
+                    "LEFT JOIN film_director ON film.id = film_director.film_id " +
+                    "LEFT JOIN director ON director.id = film_director.director_id " +
+                    "WHERE LOWER(film.title) LIKE ? OR LOWER(director.name) LIKE ? " +
+                    "GROUP BY film_like.film_id " +
+                    "ORDER BY likes DESC",
+                new FilmMapper(),
+                "%" + query.toLowerCase() + "%",
+                "%" + query.toLowerCase() + "%"
+        );
+
+        return completeExternalEntitiesForFilms(films);
+    }
+
+    private List<Film> completeExternalEntitiesForFilms(List<Film> films) {
+        Map<Long, Set<Genre>> genres = buildGenresMap(films);
+        Map<Long, Set<Director>> directors = buildDirectorsMap(films);
+
+        for (Film film : films) {
+            if (genres.containsKey(film.getId())) {
+                film.setGenres((LinkedHashSet<Genre>) genres.get(film.getId()));
+            }
+            if (directors.containsKey(film.getId())) {
+                film.setDirectors((LinkedHashSet<Director>) directors.get(film.getId()));
+            }
+        }
+
+        return films;
+    }
+
+    private Map<Long, Set<Genre>> buildGenresMap(List<Film> films) {
+        List<Long> filmIds = films.stream().map(Film::getId).collect(Collectors.toList());
+        String filmsInSql = String.join(",", Collections.nCopies(filmIds.size(), "?"));
+
+        return jdbcTemplate.query(
+                String.format(
+                        "SELECT film.id, genre.* " +
+                                "FROM film " +
+                                "LEFT JOIN film_genre ON film.id = film_genre.film_id " +
+                                "LEFT JOIN genre ON genre.id = film_genre.genre_id " +
+                                "WHERE film.id IN (%s)", filmsInSql),
+                rs -> {
+                    Map<Long, Set<Genre>> resultMap = new LinkedHashMap<>();
+                    int rowNum = 0;
+
+                    while (rs.next()) {
+                        Long filmId = rs.getLong("film.id");
+
+                        Set<Genre> genres = resultMap.getOrDefault(filmId, new LinkedHashSet<>());
+                        Genre genre = new GenreDbStorage.GenreMapper().mapRow(rs, rowNum);
+                        if (genre != null && genre.getId() != null && genre.getId() != 0L) {
+                            genres.add(genre);
+                            resultMap.put(filmId, genres);
+                        }
+
+                        rowNum++;
+                    }
+
+                    return resultMap;
+                },
+                filmIds.toArray()
+        );
+    }
+
+    private Map<Long, Set<Director>> buildDirectorsMap(List<Film> films) {
+        List<Long> filmIds = films.stream().map(Film::getId).collect(Collectors.toList());
+        String filmsInSql = String.join(",", Collections.nCopies(filmIds.size(), "?"));
+
+        return jdbcTemplate.query(
+                String.format(
+                        "SELECT film.id, director.* " +
+                                "FROM film " +
+                                "LEFT JOIN film_director ON film_director.film_id = film.id " +
+                                "LEFT JOIN director ON film_director.director_id = director.id " +
+                                "WHERE film.id IN (%s)", filmsInSql),
+                rs -> {
+                    Map<Long, Set<Director>> resultMap = new LinkedHashMap<>();
+                    int rowNum = 0;
+
+                    while (rs.next()) {
+                        Long filmId = rs.getLong("film.id");
+
+                        Set<Director> directors = resultMap.getOrDefault(filmId, new LinkedHashSet<>());
+                        Director director = new DirectorDbStorage.DirectorMapper().mapRow(rs, rowNum);
+                        if (director != null && director.getId() != null && director.getId() != 0L) {
+                            directors.add(director);
+                            resultMap.put(filmId, directors);
+                        }
+
+                        rowNum++;
+                    }
+
+                    return resultMap;
+                },
+                filmIds.toArray()
+        );
+    }
+
+    @Override
+    public List<Film> getRecommendedFilms(Long userId) {
+        Long bestUserId = null;
+
+        try {
+            bestUserId = jdbcTemplate.queryForObject(
+                    "SELECT fl2.user_id " +
+                            "FROM film_like fl " +
+                            "JOIN film_like fl2 ON fl.film_id = fl2.film_id AND fl2.user_id != fl.user_id " +
+                            "WHERE fl.user_id = ? " +
+                            "GROUP BY fl.user_id, fl2.user_id " +
+                            "ORDER BY COUNT(*) DESC " +
+                            "LIMIT 1",
+                    Long.class,
+                    userId
+            );
+        } catch (EmptyResultDataAccessException ignore) {
+
+        }
+
+        if ( bestUserId == null ) {
+            return Collections.emptyList();
+        }
+
+        List<Long> recommendedFilmIds = jdbcTemplate.query(
+                "SELECT f.id " +
+                        "FROM film as f " +
+                        "LEFT JOIN film_like fl on f.id = fl.film_id and fl.user_id = ? " +
+                        "LEFT JOIN film_like fl2 on f.id = fl2.film_id and fl2.user_id = ? " +
+                        "WHERE fl.film_id IS NULL AND fl2.film_id IS NOT NULL;",
+                (ResultSet rs, int rowNum) -> rs.getLong("film.id"),
+                userId,
+                bestUserId
+        );
+
+        return findFilmsAllById(recommendedFilmIds);
     }
 }
